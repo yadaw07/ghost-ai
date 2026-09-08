@@ -4,32 +4,36 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Phase
 
-- Not started
+- Feature 01 (Design System) — complete
 
 ## Current Goal
 
-- Define the immediate implementation goal here.
+- Feature 02 (TBD)
 
 ## Completed
 
-- None yet.
+- Feature 01: Design System — shadcn/ui installed and configured for Tailwind v4, dark theme tokens matched in globals.css, Button/Card/Dialog/Input/Tabs/Textarea/ScrollArea components added to components/ui/, lucide-react installed, lib/utils.ts cn() helper in place. All components import without errors; no default light styling appears.
 
 ## In Progress
 
-- None yet.
+- None.
 
 ## Next Up
 
-- Add the next planned feature unit here.
+- Feature 02 (TBD)
 
 ## Open Questions
 
-- Add unresolved product or implementation questions here.
+- None yet.
 
 ## Architecture Decisions
 
-- Add decisions that affect the system design or data model.
+- shadcn/ui over Tailwind v4 (CSS-based token config via @theme inline in globals.css, no tailwind config.js).
+- Dark-only theme: all shadcn :root variables set to dark values directly — no .dark class switching.
+- Do not modify generated components/ui/\* files after shadcn installation.
 
 ## Session Notes
 
-- Add context needed to resume work in the next session.
+- Using Next.js 16.3.4 with React 19 and Tailwind CSS v4.
+- shadcn version 4.21.0 was used; it auto-detected Tailwind v4.
+- lucide-react 1.42.0 installed as a direct dependency.
