@@ -8,11 +8,12 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Goal
 
-- Feature 02 (TBD)
+- Feature 03 (TBD)
 
 ## Completed
 
 - Feature 01: Design System — shadcn/ui installed and configured for Tailwind v4, dark theme tokens matched in globals.css, Button/Card/Dialog/Input/Tabs/Textarea/ScrollArea components added to components/ui/, lucide-react installed, lib/utils.ts cn() helper in place. All components import without errors; no default light styling appears.
+- Feature 02: add a top navbar and a sliding project sidebar.
 
 ## In Progress
 
@@ -20,7 +21,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Next Up
 
-- Feature 02 (TBD)
+- Feature 03 (TBD)
 
 ## Open Questions
 
@@ -30,7 +31,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 - shadcn/ui over Tailwind v4 (CSS-based token config via @theme inline in globals.css, no tailwind config.js).
 - Dark-only theme: all shadcn :root variables set to dark values directly — no .dark class switching.
-- Do not modify generated components/ui/\* files after shadcn installation.
+- Do not modify generated components/ui/* files after shadcn installation.
 
 ## Session Notes
 
