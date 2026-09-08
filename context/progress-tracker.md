@@ -8,7 +8,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Goal
 
-- Feature 02 (TBD)
+- Feature 02 (Editor UI)
 
 ## Completed
 
@@ -16,11 +16,11 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## In Progress
 
-- None.
+- Feature 02: Editor Navbar and Project Sidebar components.
 
 ## Next Up
 
-- Feature 02 (TBD)
+- Feature 03 (TBD)
 
 ## Open Questions
 
@@ -30,7 +30,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 - shadcn/ui over Tailwind v4 (CSS-based token config via @theme inline in globals.css, no tailwind config.js).
 - Dark-only theme: all shadcn :root variables set to dark values directly — no .dark class switching.
-- Do not modify generated components/ui/\* files after shadcn installation.
+- Do not modify generated components/ui/* files after shadcn installation.
 
 ## Session Notes
 
