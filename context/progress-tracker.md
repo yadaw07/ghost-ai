@@ -8,15 +8,16 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Goal
 
-- Feature 02 (Editor UI)
+- Feature 03 (TBD)
 
 ## Completed
 
 - Feature 01: Design System — shadcn/ui installed and configured for Tailwind v4, dark theme tokens matched in globals.css, Button/Card/Dialog/Input/Tabs/Textarea/ScrollArea components added to components/ui/, lucide-react installed, lib/utils.ts cn() helper in place. All components import without errors; no default light styling appears.
+- Feature 02: add a top navbar and a sliding project sidebar.
 
 ## In Progress
 
-- Feature 02: Editor Navbar and Project Sidebar components.
+- None.
 
 ## Next Up
 
