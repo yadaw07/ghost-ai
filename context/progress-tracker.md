@@ -7,18 +7,19 @@ Update this file whenever the current phase, active feature, or implementation s
 - Feature 03 (Auth) — complete
 
 ## Current Goal
-- Feature 04 (TBD)
+- Feature 04: Project dialogs (completed)
 
 ## Completed
 - Feature 01: Design System — shadcn/ui installed and configured for Tailwind v4, dark theme tokens matched in globals.css, Button/Card/Dialog/Input/Tabs/Textarea/ScrollArea components added to components/ui/, lucide-react installed, lib/utils.ts cn() helper in place. All components import without errors; no default light styling appears.
 - Feature 02: add a top navbar and a sliding project sidebar.
 - Feature 03: Authentication — Clerk provider integrated, sign-in & sign-up pages with clean layout, protected routes, UserButton added to editor, proxy.ts placeholder added.
+- Feature 04: Project dialogs — create, rename, delete dialogs implemented with mock project data and UI actions.
 
 ## In Progress
 - None.
 
 ## Next Up
-- Feature 04 (TBD)
+- Feature 04: Project dialogs (completed)
 
 ## Open Questions
 - None yet.
