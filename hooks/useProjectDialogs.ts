@@ -1,81 +1,78 @@
-// "use client"
+'use client';
 
-"use client"
-
-import { useState } from "react"
+import { useState } from 'react';
 
 export interface Project {
-  id: string
-  name: string
-  slug: string
-  owned: boolean
+  id: string;
+  name: string;
+  slug: string;
+  owned: boolean;
 }
 
-type DialogType = "create" | "rename" | "delete" | null
+type DialogType = 'create' | 'rename' | 'delete' | null;
 
 export function useProjectDialogs(initialProjects: Project[] = []) {
-  const [projects, setProjects] = useState<Project[]>(initialProjects)
-  const [openDialog, setOpenDialog] = useState<DialogType>(null)
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [projects, setProjects] = useState<Project[]>(initialProjects);
+  const [openDialog, setOpenDialog] = useState<DialogType>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const openCreate = () => {
-    setOpenDialog("create")
-    setSelectedProject(null)
-  }
+    setOpenDialog('create');
+    setSelectedProject(null);
+  };
 
   const openRename = (project: Project) => {
-    setOpenDialog("rename")
-    setSelectedProject(project)
-  }
+    setOpenDialog('rename');
+    setSelectedProject(project);
+  };
 
   const openDelete = (project: Project) => {
-    setOpenDialog("delete")
-    setSelectedProject(project)
-  }
+    setOpenDialog('delete');
+    setSelectedProject(project);
+  };
 
   const closeDialog = () => {
-    setOpenDialog(null)
-    setSelectedProject(null)
-  }
+    setOpenDialog(null);
+    setSelectedProject(null);
+  };
 
   const generateSlug = (name: string) =>
-    name.trim().toLowerCase().replace(/\s+/g, "-")
+    name.trim().toLowerCase().replace(/\s+/g, '-');
 
   const createProject = (name: string) => {
-    setLoading(true)
-    const slug = generateSlug(name)
+    setLoading(true);
+
+    const slug = generateSlug(name);
     const newProject: Project = {
       id: Date.now().toString(),
       name,
       slug,
       owned: true,
-    }
-    setProjects((prev) => [...prev, newProject])
-    setLoading(false)
-    closeDialog()
-  }
+    };
+    setProjects((prev) => [...prev, newProject]);
+    setLoading(false);
+    closeDialog();
+  };
 
   const renameProject = (name: string) => {
-    if (!selectedProject) return
-    setLoading(true)
-    const slug = generateSlug(name)
+    if (!selectedProject) return;
+    setLoading(true);
+    const slug = generateSlug(name);
     setProjects((prev) =>
-      prev.map((p) =>
-        p.id === selectedProject.id ? { ...p, name, slug } : p,
-      ),
-    )
-    setLoading(false)
-    closeDialog()
-  }
+      prev.map((p) => (p.id === selectedProject.id ? { ...p, name, slug } : p)),
+    );
+    setLoading(false);
+    closeDialog();
+  };
 
   const deleteProject = () => {
-    if (!selectedProject) return
-    setLoading(true)
-    setProjects((prev) => prev.filter((p) => p.id !== selectedProject.id))
-    setLoading(false)
-    closeDialog()
-  }
+    if (!selectedProject) return;
+    setLoading(true);
+    setProjects((prev) => prev.filter((p) => p.id !== selectedProject.id));
+    setLoading(false);
+    closeDialog();
+  };
 
   return {
     projects,
@@ -89,5 +86,5 @@ export function useProjectDialogs(initialProjects: Project[] = []) {
     createProject,
     renameProject,
     deleteProject,
-  }
+  };
 }

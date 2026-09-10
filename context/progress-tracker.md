@@ -3,11 +3,10 @@
 Update this file whenever the current phase, active feature, or implementation state changes.
 
 ## Current Phase
-- Feature 01 (Design System) — complete
-- Feature 03 (Auth) — complete
+- Feature 05 (TBD)
 
 ## Current Goal
-- Feature 04: Project dialogs (completed)
+- To be determined for Feature 05.
 
 ## Completed
 - Feature 01: Design System — shadcn/ui installed and configured for Tailwind v4, dark theme tokens matched in globals.css, Button/Card/Dialog/Input/Tabs/Textarea/ScrollArea components added to components/ui/, lucide-react installed, lib/utils.ts cn() helper in place. All components import without errors; no default light styling appears.
@@ -19,7 +18,7 @@ Update this file whenever the current phase, active feature, or implementation s
 - None.
 
 ## Next Up
-- Feature 04: Project dialogs (completed)
+- Feature 05 (TBD)
 
 ## Open Questions
 - None yet.
@@ -30,6 +29,7 @@ Update this file whenever the current phase, active feature, or implementation s
 - Do not modify generated components/ui/* files after shadcn installation.
 
 ## Session Notes
+- Fixed TypeScript errors in ProjectDialogs and updated sidebar behavior to keep it open while dialogs are active
 - Using Next.js 16.3.4 with React 19 and Tailwind CSS v4.
 - shadcn version 4.21.0 was used; it auto-detected Tailwind v4.
 - lucide-react 1.42.0 installed as a direct dependency.
