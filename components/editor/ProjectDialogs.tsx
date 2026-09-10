@@ -73,9 +73,9 @@ export function ProjectDialogs({
               value={name}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === 'Enter' && name.trim()) {
                   e.preventDefault();
-                  createProject(name);
+                  createProject(name.trim());
                   onProjectCreated?.();
                 }
               }}
@@ -135,7 +135,7 @@ export function ProjectDialogs({
               value={name}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === 'Enter' && name.trim()) {
                   e.preventDefault();
                   renameProject(name.trim());
                 }

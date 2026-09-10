@@ -22,7 +22,7 @@ export function EditorNavbar({
   return (
     <header className='flex h-12 items-center justify-between bg-base border-b border-subtle px-4'>
       {/* Left section – sidebar toggle button */}
-      <Button variant='ghost' size='icon' className='h-10 w-10'  onClick={toggleSidebar}>
+      <Button variant='ghost' size='icon-lg' onClick={toggleSidebar}>
         <Icon className='h-8 w-8' />
         <span className='sr-only'>
           {isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}

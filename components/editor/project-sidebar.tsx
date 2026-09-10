@@ -56,7 +56,7 @@ export function ProjectSidebar({
             {projects.filter((p) => p.owned).length === 0 ? (
               <p className='text-muted-foreground mt-3'>No projects yet.</p>
             ) : (
-              <ul className='space-y-3 t-3'>
+              <ul className='space-y-3 mt-3'>
                 {projects
                   .filter((p) => p.owned)
                   .map((project) => (

@@ -38,7 +38,11 @@ export function useProjectDialogs(initialProjects: Project[] = []) {
   };
 
   const generateSlug = (name: string) =>
-    name.trim().toLowerCase().replace(/\s+/g, '-');
+    name
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
 
   const createProject = (name: string) => {
     setLoading(true);
