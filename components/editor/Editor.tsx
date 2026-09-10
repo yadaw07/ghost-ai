@@ -65,7 +65,7 @@ export function Editor() {
       {/* Backdrop scrim for mobile – closes sidebar when clicking outside */}
       {isSidebarOpen && !dialogs.openDialog && (
         <div
-          className='fixed inset-y-0 left-64 right-0 z-30 bg-black/10'
+          className='fixed inset-y-0 left-64 right-0 z-30 bg-black/10 md:hidden'
           onClick={closeSidebar}
         />
       )}
