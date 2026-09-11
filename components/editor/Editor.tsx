@@ -8,9 +8,17 @@ import { ProjectSidebar } from './project-sidebar';
 import { ProjectDialogs } from './ProjectDialogs';
 
 import { Button } from '@/components/ui/button';
-import { useProjectDialogs, Project } from '@/hooks/useProjectDialogs';
+import { Project, useProjectActions } from '@/hooks/useProjectActions';
 
-export function Editor() {
+interface EditorProps {
+  initialOwnedProjects: Project[];
+  initialSharedProjects: Project[];
+}
+
+export function Editor({
+  initialOwnedProjects,
+  initialSharedProjects,
+}: EditorProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
@@ -21,24 +29,7 @@ export function Editor() {
     setIsSidebarOpen(false);
   };
 
-  // Mock initial projects (one owned, one shared)
-  const initialProjects: Project[] = [
-    { id: '1', name: 'Demo Project', slug: 'demo-project', owned: true },
-    {
-      id: '2',
-      name: 'Demo Project the second',
-      slug: 'demo-project-2',
-      owned: true,
-    },
-    {
-      id: '3',
-      name: 'my Shared Project',
-      slug: 'my-shared-project',
-      owned: false,
-    },
-  ];
-
-  const dialogs = useProjectDialogs(initialProjects);
+  const actions = useProjectActions();
 
   return (
     <div className='flex min-h-screen flex-col bg-background'>
@@ -50,23 +41,32 @@ export function Editor() {
       <ProjectSidebar
         isOpen={isSidebarOpen}
         onClose={closeSidebar}
-        projects={dialogs.projects}
-        onCreate={dialogs.openCreate}
-        onRename={dialogs.openRename}
-        onDelete={dialogs.openDelete}
+        projects={[...initialOwnedProjects, ...initialSharedProjects]}
+        onCreate={actions.openCreate}
+        onRename={actions.openRename}
+        onDelete={actions.openDelete}
       />
 
       {/* Dialogs for create/rename/delete */}
       <ProjectDialogs
-        {...dialogs}
-        onProjectCreated={() => setIsSidebarOpen(true)}
+        openDialog={actions.openDialog}
+        selectedProject={actions.selectedProject}
+        loading={actions.loading}
+        projectName={actions.projectName}
+        updateProjectName={actions.updateProjectName}
+        roomId={actions.roomId}
+        closeDialog={actions.closeDialog}
+        createProject={actions.createProject}
+        renameProject={actions.renameProject}
+        deleteProject={actions.deleteProject}
       />
 
-      {/* Backdrop scrim for mobile – closes sidebar when clicking outside */}
-      {isSidebarOpen && !dialogs.openDialog && (
+      {/* Mobile backdrop — closes sidebar when clicking outside it */}
+      {isSidebarOpen && !actions.openDialog && (
         <div
-          className='fixed inset-y-0 left-64 right-0 z-30 bg-black/10 md:hidden'
+          className='fixed inset-0 z-30 bg-black/10 md:hidden'
           onClick={closeSidebar}
+          aria-hidden='true'
         />
       )}
 
@@ -79,7 +79,7 @@ export function Editor() {
             Start a new architecture workspace, or choose a project from the
             sidebar.
           </p>
-          <Button variant='default' onClick={dialogs.openCreate}>
+          <Button variant='default' onClick={actions.openCreate}>
             <Plus className='mr-1 h-5 w-5' />
             New Project
           </Button>
