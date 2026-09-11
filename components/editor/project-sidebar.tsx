@@ -3,14 +3,14 @@
 import { X, Plus, Pencil, Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Project } from '@/hooks/useProjectDialogs';
+import { Project } from '@/hooks/useProjectActions';
 
 interface ProjectSidebarProps {
   /** Controls whether the sidebar is visible */
   isOpen: boolean;
   /** Called when the user clicks the close button */
   onClose: () => void;
-  /** List of mock projects */
+  /** Projects available to the current user */
   projects: Project[];
   /** Trigger opening the "Create Project" dialog */
   onCreate: () => void;
@@ -62,7 +62,7 @@ export function ProjectSidebar({
                   .map((project) => (
                     <li
                       key={project.id}
-                      className='flex items-center justify-between'
+                      className='group flex items-center justify-between rounded-md px-2 py-1 hover:bg-subtle'
                     >
                       <div className='flex flex-col'>
                         <span className='text-foreground'>{project.name}</span>
@@ -71,6 +71,7 @@ export function ProjectSidebar({
                         <Button
                           variant='ghost'
                           size='icon-sm'
+                          className='opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity'
                           onClick={() => onRename(project)}
                         >
                           <Pencil className='h-4 w-4' />
@@ -79,6 +80,7 @@ export function ProjectSidebar({
                         <Button
                           variant='ghost'
                           size='icon-sm'
+                          className='opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity'
                           onClick={() => onDelete(project)}
                         >
                           <Trash className='h-4 w-4' />
