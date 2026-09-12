@@ -20,11 +20,8 @@ function slugify(name: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-function generateRoomId(name: string): string {
-  const base = slugify(name);
-  const suffix = Math.random().toString(36).slice(2, 8);
-
-  return `${base}-${suffix}`;
+function shortSuffix(): string {
+  return Math.random().toString(36).slice(2, 6);
 }
 
 export function useProjectActions() {
@@ -37,9 +34,15 @@ export function useProjectActions() {
   const [projectName, setProjectName] = useState('');
   const [roomId, setRoomId] = useState('');
 
+  const [suffix, setSuffix] = useState('');
+
   const openCreate = () => {
     setProjectName('');
     setRoomId('');
+
+    const s = shortSuffix();
+    setSuffix(s);
+
     setSelectedProject(null);
     setOpenDialog('create');
   };
@@ -67,12 +70,11 @@ export function useProjectActions() {
   const updateProjectName = (name: string) => {
     setProjectName(name);
 
-    if (openDialog === 'create') {
-      if (name.trim()) {
-        setRoomId(generateRoomId(name));
-      } else {
-        setRoomId('');
-      }
+    if (name.trim()) {
+      const base = slugify(name);
+      setRoomId(`${base}-${suffix}`);
+    } else {
+      setRoomId('');
     }
   };
 
@@ -84,9 +86,6 @@ export function useProjectActions() {
     setLoading(true);
 
     try {
-      // Use the already-generated room ID.
-      const finalRoomId = roomId || generateRoomId(name);
-
       const response = await fetch('/api/projects', {
         method: 'POST',
         headers: {
@@ -94,7 +93,7 @@ export function useProjectActions() {
         },
         body: JSON.stringify({
           name,
-          slug: finalRoomId,
+          id: roomId,
         }),
       });
 
@@ -105,8 +104,9 @@ export function useProjectActions() {
       const { project }: { project: Project } = await response.json();
 
       closeDialog();
+      router.refresh();
 
-      router.push(`/editor/${project.slug}`);
+      router.push(`/editor/${project.id}`);
     } catch (error) {
       console.error('Failed to create project:', error);
     } finally {

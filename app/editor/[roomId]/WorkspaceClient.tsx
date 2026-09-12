@@ -3,8 +3,14 @@
 import { useState } from 'react';
 import { UserButton } from '@clerk/nextjs';
 
-import { PanelLeftOpen, PanelLeftClose } from 'lucide-react';
-import { Bot, Share2, Sparkles } from 'lucide-react';
+import {
+  PanelLeftOpen,
+  PanelLeftClose,
+  Bot,
+  Share2,
+  Sparkles,
+  Compass,
+} from 'lucide-react';
 
 import { ProjectSidebar } from '@/components/editor/project-sidebar';
 import { Button } from '@/components/ui/button';
@@ -108,7 +114,7 @@ export function WorkspaceClient({
           {/* Canvas placeholder */}
           <div className='flex max-w-lg flex-col items-center px-6 text-center'>
             <div className='mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-subtle bg-surface shadow-lg'>
-              <Sparkles className='h-7 w-7 text-primary' />
+              <Compass className='h-7 w-7 text-primary' />
             </div>
 
             <p className='mb-2 text-[11px] font-medium uppercase tracking-[0.25em] text-muted-foreground'>
