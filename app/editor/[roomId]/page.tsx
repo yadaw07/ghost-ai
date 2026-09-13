@@ -50,6 +50,7 @@ export default async function WorkspacePage({
       roomId={roomId}
       projects={projects}
       activeProjectId={project.id}
+      isOwner={project.ownerId === userId}
     />
   );
 }

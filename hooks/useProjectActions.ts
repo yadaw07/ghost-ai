@@ -50,6 +50,7 @@ export function useProjectActions() {
   const openRename = (project: Project) => {
     setProjectName(project.name);
     setSelectedProject(project);
+
     setOpenDialog('rename');
   };
 
@@ -70,12 +71,15 @@ export function useProjectActions() {
   const updateProjectName = (name: string) => {
     setProjectName(name);
 
-    if (name.trim()) {
-      const base = slugify(name);
-      setRoomId(`${base}-${suffix}`);
-    } else {
+    if (openDialog !== 'create') return;
+
+    if (!name.trim()) {
       setRoomId('');
+      return;
     }
+
+    const base = slugify(name);
+    setRoomId(`${base}-${suffix}`);
   };
 
   const createProject = async () => {

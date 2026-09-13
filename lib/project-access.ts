@@ -44,7 +44,9 @@ export async function checkProjectAccess(
 
   if (!primaryEmail) return false;
 
-  return project.collaborators.some((c) => c.email === primaryEmail);
+  return project.collaborators.some(
+    (c) => c.email === primaryEmail.toLowerCase(),
+  );
 }
 
 /**
@@ -53,6 +55,6 @@ export async function checkProjectAccess(
 export async function getProjectById(projectId: string) {
   return prisma.project.findUnique({
     where: { id: projectId },
-    select: { id: true, name: true },
+    select: { id: true, name: true, ownerId: true },
   });
 }

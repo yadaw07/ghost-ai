@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 
 import { ProjectSidebar } from '@/components/editor/project-sidebar';
+import { ShareDialog } from '@/components/editor/share-dialog';
 import { Button } from '@/components/ui/button';
 import type { Project } from '@/hooks/useProjectActions';
 
@@ -21,6 +22,7 @@ interface WorkspaceClientProps {
   roomId: string;
   projects: Project[];
   activeProjectId: string;
+  isOwner: boolean;
 }
 
 export function WorkspaceClient({
@@ -28,9 +30,11 @@ export function WorkspaceClient({
   roomId,
   projects,
   activeProjectId,
+  isOwner,
 }: WorkspaceClientProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isAiSidebarOpen, setIsAiSidebarOpen] = useState(true);
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
 
   return (
     <div className='flex h-screen flex-col overflow-hidden bg-background'>
@@ -64,7 +68,12 @@ export function WorkspaceClient({
 
         {/* Right side */}
         <div className='flex items-center gap-2'>
-          <Button variant='ghost' size='sm' className='hidden sm:flex' disabled>
+          <Button
+            variant='ghost'
+            size='sm'
+            className='hidden sm:flex'
+            onClick={() => setIsShareDialogOpen(true)}
+          >
             <Share2 className='mr-1.5 h-3.5 w-3.5' />
             Share
           </Button>
@@ -188,6 +197,12 @@ export function WorkspaceClient({
           </aside>
         )}
       </div>
+      <ShareDialog
+        open={isShareDialogOpen}
+        onOpenChange={setIsShareDialogOpen}
+        projectId={activeProjectId}
+        isOwner={isOwner}
+      />
     </div>
   );
 }

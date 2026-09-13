@@ -141,7 +141,7 @@ export function ProjectDialogs({
               }}
             />
 
-            {projectName && (
+            {roomId && (
               <p className='text-sm text-muted-foreground'>
                 Room ID: <span className='font-medium'>{roomId}</span>
               </p>
