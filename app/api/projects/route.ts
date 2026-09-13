@@ -28,14 +28,14 @@ export async function POST(req: Request): Promise<NextResponse> {
   const body = await req.json().catch(() => ({}));
 
   const name: string = body?.name ?? 'Untitled Project';
-  const slug: string = body?.slug;
+  const id: string = body?.id ?? '';
 
   try {
     const project = await prisma.project.create({
       data: {
-        name,
+        id,
         ownerId: userId,
-        slug,
+        name,
       },
     });
 

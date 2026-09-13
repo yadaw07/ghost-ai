@@ -43,12 +43,6 @@ export function ProjectDialogs({
   renameProject,
   deleteProject,
 }: ProjectDialogsProps) {
-  const slug = projectName
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-
   return (
     <>
       {/* Create Project Dialog */}
@@ -147,9 +141,9 @@ export function ProjectDialogs({
               }}
             />
 
-            {projectName && (
+            {roomId && (
               <p className='text-sm text-muted-foreground'>
-                Slug: <span className='font-medium'>{slug}</span>
+                Room ID: <span className='font-medium'>{roomId}</span>
               </p>
             )}
           </div>

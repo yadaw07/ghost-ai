@@ -1,6 +1,6 @@
 ## Current Phase
 
-- Feature 05
+- Feature 09 (completed)
 
 ## Current Goal
 
@@ -13,8 +13,11 @@
 - Feature 03: Authentication — Clerk provider integrated, sign-in & sign-up pages with clean layout, protected routes, UserButton added to editor, proxy.ts placeholder added.
 - Feature 04: Project dialogs — create, rename, delete dialogs implemented with mock project data and UI actions.
 - Feature 05: Prisma foundation — Project and ProjectCollaborator models added, Prisma 7 client singleton configured for Accelerate/direct PostgreSQL connections, and initial database migration created.
-- Feature 06: Implemented backend API routes for project CRUD with authentication and ownership checks, Prisma client used for DB operations.
+- Feature 06: Implemented backend API routes for project CRUD with authentication and ownership
+  checks, Prisma client used for DB operations.
 - Feature 07: Wired editor home sidebar and dialogs to real project API; server component fetches owned and shared projects, passes data to client component; create/rename/delete actions navigate or refresh appropriately.
+- Feature 08: Workspace shell page with access checks under `/editor/[roomId]`.
+- Feature 09: Share dialog added to the workspace. Owners can invite, list, remove collaborators, and copy the project link; collaborators can view the list only. Collaborator emails are enriched with Clerk display names and avatars when available.
 
 ## In Progress
 
@@ -22,7 +25,7 @@
 
 ## Next Up
 
-- None.
+- Next feature specification.
 
 ## Open Questions
 
@@ -32,7 +35,7 @@
 
 - shadcn/ui over Tailwind v4 (CSS-based token config via @theme inline in globals.css, no tailwind config.js).
 - Dark-only theme: all shadcn :root variables set to dark values directly — no .dark class switching.
-- Do not modify generated components/ui/* files after shadcn installation.
+- Do not modify generated components/ui/\* files after shadcn installation.
 - Prisma models are organized using Prisma's multi-file schema structure under prisma/models/.
 - Clerk user IDs are stored directly as Project.ownerId; no local User model is introduced.
 
