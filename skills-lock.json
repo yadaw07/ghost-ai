@@ -37,6 +37,12 @@
       "skillPath": "skills/core/clerk-setup/SKILL.md",
       "computedHash": "9048294220ffd0c1e58c5dc4e6ee2c2bd1d93f444eb58078c92f5448d1a3c55b"
     },
+    "liveblocks-best-practices": {
+      "source": "liveblocks/skills",
+      "sourceType": "github",
+      "skillPath": "skills/liveblocks-best-practices/SKILL.md",
+      "computedHash": "df4f54f66e81c580d25c5fee989768368837df694ab63c0f4a0fd70500cd16af"
+    },
     "prisma-cli": {
       "source": "prisma/skills",
       "sourceType": "github",
