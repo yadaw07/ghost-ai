@@ -1,3 +1,5 @@
+import type { CanvasNode, CanvasEdge } from './types/canvas';
+
 declare global {
   interface Liveblocks {
     Presence: {
@@ -5,12 +7,15 @@ declare global {
       isThinking: boolean;
     };
 
-    Storage: {};
+    Storage: {
+      nodes: CanvasNode[];
+      edges: CanvasEdge[];
+    };
 
     UserMeta: {
       id: string;
       name: string;
-      avatar: string | null;
+      avatar: string;
       color: string;
     };
 
