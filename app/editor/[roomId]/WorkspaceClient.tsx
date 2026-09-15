@@ -9,13 +9,14 @@ import {
   Bot,
   Share2,
   Sparkles,
-  Compass,
 } from 'lucide-react';
 
 import { ProjectSidebar } from '@/components/editor/project-sidebar';
 import { ShareDialog } from '@/components/editor/share-dialog';
+import { CanvasWrapper } from '@/components/canvas/CanvasWrapper';
 import { Button } from '@/components/ui/button';
-import type { Project } from '@/hooks/useProjectActions';
+
+import { useProjectActions, type Project } from '@/hooks/useProjectActions';
 
 interface WorkspaceClientProps {
   projectName: string;
@@ -35,6 +36,8 @@ export function WorkspaceClient({
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isAiSidebarOpen, setIsAiSidebarOpen] = useState(true);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+
+  const actions = useProjectActions();
 
   return (
     <div className='flex h-screen flex-col overflow-hidden bg-background'>
@@ -101,45 +104,17 @@ export function WorkspaceClient({
               isOpen={true}
               onClose={() => setIsSidebarOpen(false)}
               projects={projects}
-              onCreate={() => {}}
-              onRename={() => {}}
-              onDelete={() => {}}
+              onCreate={actions.openCreate}
+              onRename={actions.openRename}
+              onDelete={actions.openDelete}
               activeProjectId={activeProjectId}
             />
           </div>
         )}
 
         {/* Canvas */}
-        <main
-          className='relative flex min-w-0 flex-1 items-center justify-center overflow-hidden rounded-2xl border border-subtle bg-base'
-          style={{
-            backgroundImage: `
-              linear-gradient(to right, rgba(255,255,255,0.025) 1px, transparent 1px),
-              linear-gradient(to bottom, rgba(255,255,255,0.025) 1px, transparent 1px)
-            `,
-            backgroundSize: '48px 48px',
-          }}
-        >
-          {/* Canvas placeholder */}
-          <div className='flex max-w-lg flex-col items-center px-6 text-center'>
-            <div className='mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-subtle bg-surface shadow-lg'>
-              <Compass className='h-7 w-7 text-primary' />
-            </div>
-
-            <p className='mb-2 text-[11px] font-medium uppercase tracking-[0.25em] text-muted-foreground'>
-              Workspace shell
-            </p>
-
-            <h2 className='text-2xl font-medium tracking-tight text-foreground'>
-              Canvas and collaboration tooling land here next.
-            </h2>
-
-            <p className='mt-4 max-w-md text-sm leading-6 text-muted-foreground'>
-              This room is ready for the shared architecture canvas, durable AI
-              workflows, and real-time presence. For now, the shell is wired
-              with project context and navigation only.
-            </p>
-          </div>
+        <main className='relative flex min-w-0 flex-1 items-center justify-center overflow-hidden rounded-2xl border border-subtle bg-base'>
+          <CanvasWrapper roomId={roomId} />
         </main>
 
         {/* AI sidebar */}

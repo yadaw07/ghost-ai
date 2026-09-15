@@ -1,10 +1,10 @@
 ## Current Phase
 
-- Feature 09 (completed)
+- Feature 12: Shape Panel — Add a draggable shape toolbar to the canvas for creating new nodes.
 
 ## Current Goal
 
-- Prisma foundation — project data models, Prisma client singleton, and first database migration.
+- Next feature implementation.
 
 ## Completed
 
@@ -18,14 +18,16 @@
 - Feature 07: Wired editor home sidebar and dialogs to real project API; server component fetches owned and shared projects, passes data to client component; create/rename/delete actions navigate or refresh appropriately.
 - Feature 08: Workspace shell page with access checks under `/editor/[roomId]`.
 - Feature 09: Share dialog added to the workspace. Owners can invite, list, remove collaborators, and copy the project link; collaborators can view the list only. Collaborator emails are enriched with Clerk display names and avatars when available.
+- Feature 10: Liveblocks setup — typed presence and user metadata, cached Node client, and authenticated room-token endpoint implemented.
+- Feature 11: Base Canvas — implemented collaborative React Flow canvas foundation with Liveblocks synchronization, shared types, and basic canvas UI (MiniMap, dot-grid).
 
 ## In Progress
 
-- None.
+- None
 
 ## Next Up
 
-- Next feature specification.
+- Feature-13 (TBD).
 
 ## Open Questions
 
