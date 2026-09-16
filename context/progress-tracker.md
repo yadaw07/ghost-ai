@@ -1,6 +1,6 @@
 ## Current Phase
 
-- Feature 12: Shape Panel — Add a draggable shape toolbar to the canvas for creating new nodes.
+- Feature 15: Node Color Toolbar — Adding a floating toolbar to change node background and text colors.
 
 ## Current Goal
 
@@ -20,6 +20,9 @@
 - Feature 09: Share dialog added to the workspace. Owners can invite, list, remove collaborators, and copy the project link; collaborators can view the list only. Collaborator emails are enriched with Clerk display names and avatars when available.
 - Feature 10: Liveblocks setup — typed presence and user metadata, cached Node client, and authenticated room-token endpoint implemented.
 - Feature 11: Base Canvas — implemented collaborative React Flow canvas foundation with Liveblocks synchronization, shared types, and basic canvas UI (MiniMap, dot-grid).
+- Feature 12: Shape Panel — Add a draggable shape toolbar to the canvas for creating new nodes.
+- Feature 13: Node Shape — Implemented proper shape rendering (CSS and SVG) and add a ghost preview during drag-and-drop from the shape panel.
+- Feature 14: Node Editing — Added resizing handles and inline double-click label editing for canvas nodes.
 
 ## In Progress
 
@@ -27,7 +30,7 @@
 
 ## Next Up
 
-- Feature-13 (TBD).
+- None.
 
 ## Open Questions
 

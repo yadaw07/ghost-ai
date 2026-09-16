@@ -75,8 +75,9 @@ export async function GET(
   const { projectId } = await params;
   const project = await getProjectForMember(projectId, userId);
 
-  if (!project)
+  if (!project) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
 
   return NextResponse.json({
     collaborators: await enrichCollaborators(project.collaborators),
@@ -94,11 +95,13 @@ export async function POST(
   const { projectId } = await params;
   const project = await prisma.project.findUnique({ where: { id: projectId } });
 
-  if (!project)
+  if (!project) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
 
-  if (project.ownerId !== userId)
+  if (project.ownerId !== userId) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   const body = (await request.json().catch(() => ({}))) as { email?: unknown };
   const email =

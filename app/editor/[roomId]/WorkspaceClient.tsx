@@ -13,6 +13,7 @@ import {
 
 import { ProjectSidebar } from '@/components/editor/project-sidebar';
 import { ShareDialog } from '@/components/editor/share-dialog';
+import { ProjectDialogs } from '@/components/editor/ProjectDialogs';
 import { CanvasWrapper } from '@/components/canvas/CanvasWrapper';
 import { Button } from '@/components/ui/button';
 
@@ -177,6 +178,19 @@ export function WorkspaceClient({
         onOpenChange={setIsShareDialogOpen}
         projectId={activeProjectId}
         isOwner={isOwner}
+      />
+
+      <ProjectDialogs
+        openDialog={actions.openDialog}
+        selectedProject={actions.selectedProject}
+        loading={actions.loading}
+        projectName={actions.projectName}
+        updateProjectName={actions.updateProjectName}
+        roomId={actions.roomId}
+        closeDialog={actions.closeDialog}
+        createProject={actions.createProject}
+        renameProject={actions.renameProject}
+        deleteProject={actions.deleteProject}
       />
     </div>
   );
