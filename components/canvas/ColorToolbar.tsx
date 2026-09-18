@@ -1,7 +1,6 @@
 'use client';
 
-import React from 'react';
-import { useMutation } from '@liveblocks/react';
+import { useReactFlow } from '@xyflow/react';
 import { cn } from '@/lib/utils';
 import { NODE_COLORS, NodeColorKey } from '@/types/canvas';
 
@@ -11,15 +10,19 @@ interface ColorToolbarProps {
   position: { x: number; y: number };
 }
 
-export function ColorToolbar({ nodeId, currentColor, position }: ColorToolbarProps) {
-  const updateNodeColor = useMutation(
-    ({ storage }, newColor: NodeColorKey) => {
-      const node = storage.get('flow').get('nodes').get(nodeId);
-      if (!node) return;
-      node.get('data').set('color', newColor);
-    },
-    [nodeId],
-  );
+export function ColorToolbar({
+  nodeId,
+  currentColor,
+  position,
+}: ColorToolbarProps) {
+  const { updateNode } = useReactFlow();
+
+  const updateNodeColor = (newColor: NodeColorKey) => {
+    updateNode(nodeId, (node) => ({
+      ...node,
+      data: { ...node.data, color: newColor },
+    }));
+  };
 
   return (
     <div
@@ -41,17 +44,22 @@ export function ColorToolbar({ nodeId, currentColor, position }: ColorToolbarPro
             onClick={() => updateNodeColor(key)}
             className={cn(
               'h-5 w-5 rounded-full border transition-all duration-200 outline-none hover:scale-110',
-              isActive ? 'border-white ring-2 ring-white/20 scale-110' : 'border-white/10',
+              isActive
+                ? 'border-white ring-2 ring-white/20 scale-110'
+                : 'border-white/10',
             )}
-            style={{
-              backgroundColor: bg,
-              boxShadow: isActive ? `0 0 0 2px ${text}40` : 'none',
-              '--glow-color': text,
-            } as React.CSSProperties}
+            style={
+              {
+                backgroundColor: bg,
+                boxShadow: isActive ? `0 0 0 2px ${text}40` : 'none',
+                '--glow-color': text,
+              } as React.CSSProperties
+            }
             title={key}
             onMouseEnter={(e) => {
               if (!isActive) {
-                (e.currentTarget as HTMLElement).style.boxShadow = `0 0 8px ${text}`;
+                (e.currentTarget as HTMLElement).style.boxShadow =
+                  `0 0 8px ${text}`;
               }
             }}
             onMouseLeave={(e) => {
@@ -59,8 +67,7 @@ export function ColorToolbar({ nodeId, currentColor, position }: ColorToolbarPro
                 (e.currentTarget as HTMLElement).style.boxShadow = 'none';
               }
             }}
-          >
-          </button>
+          ></button>
         );
       })}
     </div>

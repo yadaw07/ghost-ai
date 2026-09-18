@@ -1,25 +1,42 @@
 'use client';
 
-import React, { useCallback, useRef, useState, createContext } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  createContext,
+} from 'react';
 
 import {
   ReactFlow,
   MiniMap,
   Background,
   BackgroundVariant,
+  MarkerType,
   useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
 import { useLiveblocksFlow } from '@liveblocks/react-flow';
+import { useHistory } from '@liveblocks/react';
 
-import { ShapePanel } from './ShapePanel';
 import { ShapeNode } from './nodes/ShapeNode';
 import { CanvasEdge } from './edges/CanvasEdge';
 
+import { ShapePanel } from './ShapePanel';
+import { CanvasControls } from './CanvasControls';
 import { ColorToolbar } from './ColorToolbar';
-import { CanvasNode, NodeData, NodeColorKey } from '@/types/canvas';
+
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import {
+  CanvasNode,
+  TCanvasEdge,
+  NodeData,
+  NodeColorKey,
+} from '@/types/canvas';
 import { cn } from '@/lib/utils';
+import type { CanvasTemplate } from '@/components/editor/starter-templates';
 
 const nodeTypes = {
   shape: ShapeNode,
@@ -35,7 +52,15 @@ interface CanvasContextType {
 
 export const CanvasContext = createContext<CanvasContextType | null>(null);
 
-export function CollaborativeCanvas() {
+interface CollaborativeCanvasProps {
+  templateToImport: CanvasTemplate | null;
+  onTemplateImported: () => void;
+}
+
+export function CollaborativeCanvas({
+  templateToImport,
+  onTemplateImported,
+}: CollaborativeCanvasProps) {
   const nodeCounter = useRef(0);
   const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -47,9 +72,25 @@ export function CollaborativeCanvas() {
     height: number;
   } | null>(null);
 
-  const { screenToFlowPosition, flowToScreenPosition } = useReactFlow();
+  const reactFlow = useReactFlow();
+  const {
+    screenToFlowPosition,
+    flowToScreenPosition,
+    zoomIn,
+    zoomOut,
+    fitView,
+  } = reactFlow;
+
+  const { undo, redo, canUndo, canRedo } = useHistory();
+
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, onDelete } =
-    useLiveblocksFlow<CanvasNode>({ suspense: true });
+    useLiveblocksFlow<CanvasNode, TCanvasEdge>({ suspense: true });
+
+  const handleFitView = useCallback(() => {
+    fitView({ duration: 200 });
+  }, [fitView]);
+
+  useKeyboardShortcuts(reactFlow, undo, redo);
 
   const handleLabelChange = useCallback(
     (edgeId: string, newLabel: string) => {
@@ -67,6 +108,42 @@ export function CollaborativeCanvas() {
   );
 
   const selectedNode = nodes.find((n) => n.selected);
+
+  useEffect(() => {
+    if (!templateToImport) return;
+
+    onEdgesChange([
+      ...edges.map((edge) => ({ type: 'remove' as const, id: edge.id })),
+      ...templateToImport.edges.map((edge) => ({
+        type: 'add' as const,
+        item: edge,
+      })),
+    ]);
+
+    onNodesChange([
+      ...nodes.map((node) => ({ type: 'remove' as const, id: node.id })),
+      ...templateToImport.nodes.map((node) => ({
+        type: 'add' as const,
+        item: node,
+      })),
+    ]);
+
+    onTemplateImported();
+    const fitViewFrame = window.requestAnimationFrame(() => {
+      fitView({ duration: 200, padding: 0.2 });
+    });
+
+    return () => window.cancelAnimationFrame(fitViewFrame);
+  }, [
+    edges,
+    fitView,
+    nodes,
+    onEdgesChange,
+    onNodesChange,
+    onTemplateImported,
+    templateToImport,
+  ]);
+
   const selectedNodePosition = selectedNode
     ? (() => {
         const screenPosition = flowToScreenPosition({
@@ -175,7 +252,13 @@ export function CollaborativeCanvas() {
           onDelete={onDelete}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
-          defaultEdgeOptions={{ type: 'canvas', data: { label: '' } }}
+          defaultEdgeOptions={{
+            type: 'canvas',
+            data: { label: '' },
+            markerEnd: {
+              type: MarkerType.ArrowClosed,
+            },
+          }}
           fitView
         >
           <Background
@@ -189,16 +272,28 @@ export function CollaborativeCanvas() {
             nodeColor='var(--color-primary)'
           />
         </ReactFlow>
+        <CanvasControls
+          onZoomIn={zoomIn}
+          onZoomOut={zoomOut}
+          onFitView={handleFitView}
+          onUndo={undo}
+          onRedo={redo}
+          canUndo={Boolean(canUndo)}
+          canRedo={Boolean(canRedo)}
+        />
         <ShapePanel onDragStart={handleDragStart} onDragEnd={handleDragEnd} />
 
         {selectedNode && selectedNodePosition && (
           <ColorToolbar
             nodeId={selectedNode.id}
-            currentColor={(selectedNode.data.color as NodeColorKey) || 'neutral'}
+            currentColor={
+              (selectedNode.data.color as NodeColorKey) || 'neutral'
+            }
             position={selectedNodePosition}
           />
         )}
 
+        {/* A temporary visual preview while you're dragging a shape from the ShapePanel. */}
         {dragPreview && (
           <div
             className='pointer-events-none fixed z-100 opacity-50'
@@ -220,7 +315,9 @@ export function CollaborativeCanvas() {
                 height: dragPreview.height,
               }}
             >
-              {['diamond', 'hexagon', 'cylinder'].includes(dragPreview.shape) && (
+              {['diamond', 'hexagon', 'cylinder'].includes(
+                dragPreview.shape,
+              ) && (
                 <div className='relative w-full h-full'>
                   {/* Simplified SVG preview for complex shapes */}
                   <svg

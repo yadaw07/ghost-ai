@@ -22,4 +22,4 @@ export interface NodeData extends Record<string, unknown> {
 }
 
 export type CanvasNode = Node<NodeData>;
-export type CanvasEdge = Edge;
+export type TCanvasEdge = Edge<{ label: string }, 'canvas'>;

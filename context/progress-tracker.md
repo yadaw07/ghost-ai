@@ -1,10 +1,10 @@
 ## Current Phase
 
-- Feature 16: Custom Canvas Edges + Inline Edge Labels — Implementing custom edge rendering with right-angle routing and inline collaborative label editing. (completed)
+- Feature 18: Starter Template Library — Implementing predefined architecture templates with collaborative canvas replacement import. (completed)
 
 ## Current Goal
 
-- Implement custom canvas edges and inline edge labels as specified in feature-spec 16.
+- Implement starter templates as specified in feature-spec 18 (completed).
 
 ## Completed
 
@@ -25,14 +25,12 @@
 - Feature 14: Node Editing — Added resizing handles and inline double-click label editing for canvas nodes.
 - Feature 15: Node Color Toolbar — Adding a floating toolbar to change node background and text colors.
 - Feature 16: Replace the default canvas edges with custom edges that feel easier to follow, easier to click, and support inline labels.
-
-## In Progress
-
-- None
+- Feature 17: Canvas Ergonomics — Added floating control bar for zoom and undo/redo, implemented keyboard shortcuts for zoom and history, and removed the minimap.
+- Feature 18: Starter Template Library — Added three predefined templates, lightweight SVG previews, navbar import entry point, and collaborative replacement imports with automatic fit view.
 
 ## Next Up
 
-- Feature-17 (TBD).
+- Feature-19 (TBD).
 
 ## Open Questions
 
@@ -53,3 +51,5 @@
 - shadcn version 4.21.0 was used; it auto-detected Tailwind v4.
 - lucide-react 1.42.0 installed as a direct dependency.
 - Feature 05 added the Prisma project data layer with Project and ProjectCollaborator models, Prisma client singleton, and initial migration.
+- Feature 09 follow-up: Share dialog now shows the Clerk-enriched project owner before collaborators with an Owner badge.
+- Feature 17 follow-up: Project sidebar now overlays the canvas, with canvas controls rendered beneath it.

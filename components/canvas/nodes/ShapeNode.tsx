@@ -1,9 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Handle, Position, NodeProps, NodeResizer } from '@xyflow/react';
-
-import { useMutation } from '@liveblocks/react';
+import {
+  Handle,
+  Position,
+  NodeProps,
+  NodeResizer,
+  useReactFlow,
+} from '@xyflow/react';
 
 import { cn } from '@/lib/utils';
 import { NodeData, NODE_COLORS, NodeColorKey } from '@/types/canvas';
@@ -38,12 +42,14 @@ export function ShapeNode({
   width: nodeWidth,
   height: nodeHeight,
 }: NodeProps) {
+  const { updateNode } = useReactFlow();
+
   const nodeData = data as NodeData;
   const shape: NodeData['shape'] = nodeData.shape || 'rectangle';
   const label: string = nodeData.label || '';
 
-  const width = typeof nodeWidth === 'number' ? nodeWidth : 150;
-  const height = typeof nodeHeight === 'number' ? nodeHeight : 100;
+  const width = typeof nodeWidth === 'number' ? nodeWidth : 100;
+  const height = typeof nodeHeight === 'number' ? nodeHeight : 50;
 
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(label);
@@ -57,22 +63,14 @@ export function ShapeNode({
     setIsEditing(true);
   };
 
-  const updateNodeLabel = useMutation(
-    ({ storage }, newLabel: string) => {
-      const node = storage.get('flow').get('nodes').get(id);
-
-      if (!node) return;
-
-      node.get('data').set('label', newLabel);
-    },
-    [id],
-  );
-
   const handleBlur = () => {
     setIsEditing(false);
 
     if (editValue !== label) {
-      updateNodeLabel(editValue);
+      updateNode(id, (node) => ({
+        ...node,
+        data: { ...node.data, label: editValue },
+      }));
     }
   };
 
@@ -94,8 +92,7 @@ export function ShapeNode({
 
     const content = isEditing ? (
       <Textarea
-        className='nodrag h-auto w-full resize-none border-none bg-transparent p-0 text-center text-xs font-medium leading-tight text-foreground focus-visible:ring-0'
-        //className='nodrag bg-transparent text-center resize-none border-none focus-visible:ring-0 p-0 h-full w-full text-xs font-medium text-foreground'
+        className='nodrag nowheel w-full resize-none border-none bg-transparent p-0 text-center text-xs font-medium leading-tight text-foreground outline-none focus-visible:ring-0'
         value={editValue}
         onChange={(e) => setEditValue(e.target.value)}
         onBlur={handleBlur}
@@ -104,7 +101,7 @@ export function ShapeNode({
       />
     ) : (
       <span
-        className='text-xs font-medium px-2 text-center cursor-text'
+        className='w-full px-2 text-center text-xs font-medium cursor-text'
         style={{ color: text }}
         onDoubleClick={handleDoubleClick}
       >
@@ -141,8 +138,7 @@ export function ShapeNode({
 
     const content = isEditing ? (
       <Textarea
-        className='nodrag h-auto w-full resize-none border-none bg-transparent p-0 text-center text-xs font-medium leading-tight text-foreground focus-visible:ring-0'
-        //className='nodrag bg-transparent text-center resize-none border-none focus-visible:ring-0 p-0 h-full w-full text-xs font-medium text-foreground'
+        className='nodrag nowheel w-full resize-none border-none bg-transparent p-0 text-center text-xs font-medium leading-tight text-foreground outline-none focus-visible:ring-0'
         value={editValue}
         onChange={(e) => setEditValue(e.target.value)}
         onBlur={handleBlur}
@@ -151,7 +147,7 @@ export function ShapeNode({
       />
     ) : (
       <div
-        className='h-full flex items-center justify-center text-xs font-medium text-center cursor-text'
+        className='flex h-full w-full items-center justify-center text-center text-xs font-medium cursor-text'
         style={{ color: text }}
         onDoubleClick={handleDoubleClick}
       >
@@ -176,7 +172,7 @@ export function ShapeNode({
               strokeWidth='2'
               className='transition-colors'
             />
-            <foreignObject x='10%' y='30%' width='80%' height='80%'>
+            <foreignObject x='0' y='0' width='100%' height='100%'>
               {content}
             </foreignObject>
           </svg>
