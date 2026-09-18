@@ -29,6 +29,7 @@ export function ShareDialog({
 }: ShareDialogProps) {
   const {
     collaborators,
+    owner,
     email,
     setEmail,
     isLoading,
@@ -41,6 +42,8 @@ export function ShareDialog({
     copyProjectLink,
   } = useProjectShare({ open, projectId });
 
+  const totalCount = (owner ? 1 : 0) + collaborators.length;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='w-[calc(100%-2rem)] max-w-140! rounded-3xl bg-elevated p-6'>
@@ -50,32 +53,34 @@ export function ShareDialog({
             Share project
           </DialogTitle>
           <DialogDescription>
-            {isOwner
-              ? 'Invite people to collaborate on this workspace.'
-              : 'People with access to this workspace.'}
+            Invite collaborators, copy the workspace link, and manage access.
           </DialogDescription>
         </DialogHeader>
 
         {/* Workspace link */}
-        <div className='flex w-full min-w-0 items-center justify-between gap-3 rounded-xl border border-subtle bg-base p-2.5'>
+        <div className='flex w-full min-w-0 flex-col gap-2 rounded-xl border border-subtle bg-base p-2.5'>
+          <div className='flex w-full min-w-0 items-center justify-between gap-3'>
+            <span className='text-sm font-medium text-foreground'>
+              Workspace link
+            </span>
+            <Button
+              type='button'
+              variant='outline'
+              size='sm'
+              className='h-8 shrink-0 px-2.5 text-xs'
+              onClick={copyProjectLink}
+            >
+              {copied ? (
+                <Check className='h-3.5 w-3.5' />
+              ) : (
+                <Copy className='h-3.5 w-3.5' />
+              )}
+              {copied ? 'Copied!' : 'Copy link'}
+            </Button>
+          </div>
           <span className='min-w-0 truncate text-xs text-muted-foreground'>
             Share a direct link with teammates after you grant them access.
           </span>
-
-          <Button
-            type='button'
-            variant='outline'
-            size='sm'
-            className='h-8 shrink-0 px-2.5 text-xs'
-            onClick={copyProjectLink}
-          >
-            {copied ? (
-              <Check className='h-3.5 w-3.5' />
-            ) : (
-              <Copy className='h-3.5 w-3.5' />
-            )}
-            {copied ? 'Copied!' : 'Copy link'}
-          </Button>
         </div>
 
         {isOwner && (
@@ -87,7 +92,7 @@ export function ShareDialog({
               onKeyDown={(event) => {
                 if (event.key === 'Enter') inviteCollaborator();
               }}
-              placeholder='name@example.com'
+              placeholder='teammate@company.com'
               className='bg-base text-foreground placeholder:text-muted-foreground'
               aria-label='Collaborator email address'
             />
@@ -102,19 +107,54 @@ export function ShareDialog({
           </div>
         )}
         <div className='space-y-2'>
-          <p className='text-xs font-medium uppercase tracking-[0.16em] text-text-muted'>
-            Collaborators
-          </p>
+          <div className='flex items-center justify-between'>
+            <p className='text-xs font-medium uppercase tracking-[0.16em] text-text-muted'>
+              People with access
+            </p>
+            {!isLoading && totalCount > 0 && (
+              <p className='text-xs text-muted-foreground'>
+                {totalCount} total
+              </p>
+            )}
+          </div>
           {isLoading ? (
             <p className='text-sm text-muted-foreground'>
               Loading collaborators…
             </p>
-          ) : collaborators.length === 0 ? (
+          ) : collaborators.length === 0 && !owner ? (
             <p className='text-sm text-muted-foreground'>
               No collaborators yet.
             </p>
           ) : (
             <ul className='max-h-64 space-y-1 overflow-y-auto'>
+              {owner && (
+                <li className='flex items-center gap-3 rounded-xl px-2 py-2'>
+                  {owner.imageUrl ? (
+                    <img
+                      src={owner.imageUrl}
+                      alt=''
+                      className='h-8 w-8 rounded-full object-cover'
+                    />
+                  ) : (
+                    <div className='flex h-8 w-8 items-center justify-center rounded-full bg-subtle text-xs text-muted-foreground'>
+                      {(owner.email ?? '?').slice(0, 1).toUpperCase()}
+                    </div>
+                  )}
+                  <div className='min-w-0 flex-1'>
+                    {owner.displayName && (
+                      <p className='truncate text-sm font-medium text-foreground'>
+                        {owner.displayName}
+                      </p>
+                    )}
+                    <p className='truncate text-xs text-muted-foreground'>
+                      {owner.email ?? 'Owner'}
+                    </p>
+                  </div>
+                  <span className='rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-primary'>
+                    Owner
+                  </span>
+                </li>
+              )}
               {collaborators.map((collaborator) => (
                 <li
                   key={collaborator.id}
@@ -141,6 +181,9 @@ export function ShareDialog({
                       {collaborator.email}
                     </p>
                   </div>
+                  <span className='rounded-full border border-subtle bg-subtle/40 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground'>
+                    Collaborator
+                  </span>
                   {isOwner && (
                     <Button
                       type='button'

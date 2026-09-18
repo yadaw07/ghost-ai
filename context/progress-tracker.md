@@ -1,10 +1,10 @@
 ## Current Phase
 
-- Feature 12: Shape Panel — Add a draggable shape toolbar to the canvas for creating new nodes.
+- Feature 18: Starter Template Library — Implementing predefined architecture templates with collaborative canvas replacement import. (completed)
 
 ## Current Goal
 
-- Next feature implementation.
+- Implement starter templates as specified in feature-spec 18 (completed).
 
 ## Completed
 
@@ -17,17 +17,20 @@
   checks, Prisma client used for DB operations.
 - Feature 07: Wired editor home sidebar and dialogs to real project API; server component fetches owned and shared projects, passes data to client component; create/rename/delete actions navigate or refresh appropriately.
 - Feature 08: Workspace shell page with access checks under `/editor/[roomId]`.
-- Feature 09: Share dialog added to the workspace. Owners can invite, list, remove collaborators, and copy the project link; collaborators can view the list only. Collaborator emails are enriched with Clerk display names and avatars when available.
+- Feature 09: Share dialog added to the workspace. Owners can invite, list, remove collaborators, and copy the project link; collaborators can view the list and remove themselves. Collaborator emails are enriched with Clerk display names and avatars when available.
 - Feature 10: Liveblocks setup — typed presence and user metadata, cached Node client, and authenticated room-token endpoint implemented.
 - Feature 11: Base Canvas — implemented collaborative React Flow canvas foundation with Liveblocks synchronization, shared types, and basic canvas UI (MiniMap, dot-grid).
-
-## In Progress
-
-- None
+- Feature 12: Shape Panel — Add a draggable shape toolbar to the canvas for creating new nodes.
+- Feature 13: Node Shape — Implemented proper shape rendering (CSS and SVG) and add a ghost preview during drag-and-drop from the shape panel.
+- Feature 14: Node Editing — Added resizing handles and inline double-click label editing for canvas nodes.
+- Feature 15: Node Color Toolbar — Adding a floating toolbar to change node background and text colors.
+- Feature 16: Replace the default canvas edges with custom edges that feel easier to follow, easier to click, and support inline labels.
+- Feature 17: Canvas Ergonomics — Added floating control bar for zoom and undo/redo, implemented keyboard shortcuts for zoom and history, and removed the minimap.
+- Feature 18: Starter Template Library — Added three predefined templates, lightweight SVG previews, navbar import entry point, and collaborative replacement imports with automatic fit view.
 
 ## Next Up
 
-- Feature-13 (TBD).
+- Feature-19 (TBD).
 
 ## Open Questions
 
@@ -48,3 +51,5 @@
 - shadcn version 4.21.0 was used; it auto-detected Tailwind v4.
 - lucide-react 1.42.0 installed as a direct dependency.
 - Feature 05 added the Prisma project data layer with Project and ProjectCollaborator models, Prisma client singleton, and initial migration.
+- Feature 09 follow-up: Share dialog now shows the Clerk-enriched project owner before collaborators with an Owner badge.
+- Feature 17 follow-up: Project sidebar now overlays the canvas, with canvas controls rendered beneath it.

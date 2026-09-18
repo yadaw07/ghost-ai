@@ -10,6 +10,13 @@ interface CollaboratorResponse {
   imageUrl: string | null;
 }
 
+interface ProjectOwnerResponse {
+  id: string;
+  email: string | null;
+  displayName: string | null;
+  imageUrl: string | null;
+}
+
 async function getProjectForMember(projectId: string, userId: string) {
   const project = await prisma.project.findUnique({
     where: { id: projectId },
@@ -63,6 +70,21 @@ async function enrichCollaborators(
   });
 }
 
+async function enrichOwner(ownerId: string): Promise<ProjectOwnerResponse> {
+  const client = await clerkClient();
+  const user = await client.users.getUser(ownerId);
+  const displayName = [user.firstName, user.lastName]
+    .filter(Boolean)
+    .join(' ');
+
+  return {
+    id: user.id,
+    email: user.primaryEmailAddress?.emailAddress ?? null,
+    displayName: displayName || user.username || null,
+    imageUrl: user.imageUrl ?? null,
+  };
+}
+
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ projectId: string }> },
@@ -75,10 +97,12 @@ export async function GET(
   const { projectId } = await params;
   const project = await getProjectForMember(projectId, userId);
 
-  if (!project)
+  if (!project) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
 
   return NextResponse.json({
+    owner: await enrichOwner(project.ownerId),
     collaborators: await enrichCollaborators(project.collaborators),
   });
 }
@@ -94,11 +118,13 @@ export async function POST(
   const { projectId } = await params;
   const project = await prisma.project.findUnique({ where: { id: projectId } });
 
-  if (!project)
+  if (!project) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
 
-  if (project.ownerId !== userId)
+  if (project.ownerId !== userId) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   const body = (await request.json().catch(() => ({}))) as { email?: unknown };
   const email =

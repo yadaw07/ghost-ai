@@ -31,7 +31,15 @@ const SHAPES = [
   { type: 'hexagon', icon: Hexagon, label: 'Hexagon', width: 160, height: 120 },
 ] as const;
 
-export function ShapePanel() {
+interface ShapePanelProps {
+  onDragStart?: (
+    shape: (typeof SHAPES)[number],
+    event: React.DragEvent,
+  ) => void;
+  onDragEnd?: () => void;
+}
+
+export function ShapePanel({ onDragStart, onDragEnd }: ShapePanelProps) {
   // Handles the start of a drag operation by packing shape metadata into the dataTransfer object
   const handleDragStart = (
     event: React.DragEvent,
@@ -46,6 +54,8 @@ export function ShapePanel() {
       }),
     );
     event.dataTransfer.effectAllowed = 'copy';
+
+    onDragStart?.(shape, event);
   };
 
   return (
@@ -59,6 +69,7 @@ export function ShapePanel() {
               key={shape.type}
               draggable
               onDragStart={(event) => handleDragStart(event, shape)}
+              onDragEnd={onDragEnd}
               className={cn(
                 'cursor-grab rounded-full p-2 text-muted-foreground transition-all hover:bg-accent hover:text-foreground',
                 'active:cursor-grabbing active:scale-90',
