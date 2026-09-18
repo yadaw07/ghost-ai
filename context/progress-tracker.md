@@ -1,10 +1,10 @@
 ## Current Phase
 
-- Feature 15: Node Color Toolbar — Adding a floating toolbar to change node background and text colors.
+- Feature 16: Custom Canvas Edges + Inline Edge Labels — Implementing custom edge rendering with right-angle routing and inline collaborative label editing. (completed)
 
 ## Current Goal
 
-- Next feature implementation.
+- Implement custom canvas edges and inline edge labels as specified in feature-spec 16.
 
 ## Completed
 
@@ -17,12 +17,14 @@
   checks, Prisma client used for DB operations.
 - Feature 07: Wired editor home sidebar and dialogs to real project API; server component fetches owned and shared projects, passes data to client component; create/rename/delete actions navigate or refresh appropriately.
 - Feature 08: Workspace shell page with access checks under `/editor/[roomId]`.
-- Feature 09: Share dialog added to the workspace. Owners can invite, list, remove collaborators, and copy the project link; collaborators can view the list only. Collaborator emails are enriched with Clerk display names and avatars when available.
+- Feature 09: Share dialog added to the workspace. Owners can invite, list, remove collaborators, and copy the project link; collaborators can view the list and remove themselves. Collaborator emails are enriched with Clerk display names and avatars when available.
 - Feature 10: Liveblocks setup — typed presence and user metadata, cached Node client, and authenticated room-token endpoint implemented.
 - Feature 11: Base Canvas — implemented collaborative React Flow canvas foundation with Liveblocks synchronization, shared types, and basic canvas UI (MiniMap, dot-grid).
 - Feature 12: Shape Panel — Add a draggable shape toolbar to the canvas for creating new nodes.
 - Feature 13: Node Shape — Implemented proper shape rendering (CSS and SVG) and add a ghost preview during drag-and-drop from the shape panel.
 - Feature 14: Node Editing — Added resizing handles and inline double-click label editing for canvas nodes.
+- Feature 15: Node Color Toolbar — Adding a floating toolbar to change node background and text colors.
+- Feature 16: Replace the default canvas edges with custom edges that feel easier to follow, easier to click, and support inline labels.
 
 ## In Progress
 
@@ -30,7 +32,7 @@
 
 ## Next Up
 
-- None.
+- Feature-17 (TBD).
 
 ## Open Questions
 
