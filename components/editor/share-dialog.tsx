@@ -29,6 +29,7 @@ export function ShareDialog({
 }: ShareDialogProps) {
   const {
     collaborators,
+    owner,
     email,
     setEmail,
     isLoading,
@@ -103,7 +104,7 @@ export function ShareDialog({
         )}
         <div className='space-y-2'>
           <p className='text-xs font-medium uppercase tracking-[0.16em] text-text-muted'>
-            Collaborators
+            People with access
           </p>
           {isLoading ? (
             <p className='text-sm text-muted-foreground'>
@@ -115,6 +116,34 @@ export function ShareDialog({
             </p>
           ) : (
             <ul className='max-h-64 space-y-1 overflow-y-auto'>
+              {owner && (
+                <li className='flex items-center gap-3 rounded-xl px-2 py-2'>
+                  {owner.imageUrl ? (
+                    <img
+                      src={owner.imageUrl}
+                      alt=''
+                      className='h-8 w-8 rounded-full object-cover'
+                    />
+                  ) : (
+                    <div className='flex h-8 w-8 items-center justify-center rounded-full bg-subtle text-xs text-muted-foreground'>
+                      {(owner.email ?? '?').slice(0, 1).toUpperCase()}
+                    </div>
+                  )}
+                  <div className='min-w-0 flex-1'>
+                    {owner.displayName && (
+                      <p className='truncate text-sm font-medium text-foreground'>
+                        {owner.displayName}
+                      </p>
+                    )}
+                    <p className='truncate text-xs text-muted-foreground'>
+                      {owner.email ?? 'Owner'}
+                    </p>
+                  </div>
+                  <span className='rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-primary'>
+                    Owner
+                  </span>
+                </li>
+              )}
               {collaborators.map((collaborator) => (
                 <li
                   key={collaborator.id}

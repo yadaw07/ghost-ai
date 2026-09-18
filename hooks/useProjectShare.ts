@@ -7,6 +7,13 @@ interface Collaborator {
   imageUrl: string | null;
 }
 
+interface ProjectOwner {
+  id: string;
+  email: string | null;
+  displayName: string | null;
+  imageUrl: string | null;
+}
+
 interface UseProjectShareProps {
   open: boolean;
   projectId: string;
@@ -17,6 +24,7 @@ function isValidEmail(value: string): boolean {
 }
 
 export function useProjectShare({ open, projectId }: UseProjectShareProps) {
+  const [owner, setOwner] = useState<ProjectOwner | null>(null);
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -36,10 +44,16 @@ export function useProjectShare({ open, projectId }: UseProjectShareProps) {
       .then(async (response) => {
         if (!response.ok) throw new Error('Unable to load collaborators.');
 
-        return response.json() as Promise<{ collaborators: Collaborator[] }>;
+        return response.json() as Promise<{
+          owner: ProjectOwner;
+          collaborators: Collaborator[];
+        }>;
       })
       .then((data) => {
-        if (isCurrent) setCollaborators(data.collaborators);
+        if (isCurrent) {
+          setOwner(data.owner);
+          setCollaborators(data.collaborators);
+        }
       })
       .catch((loadError: unknown) => {
         if (isCurrent)
@@ -136,6 +150,7 @@ export function useProjectShare({ open, projectId }: UseProjectShareProps) {
   };
 
   return {
+    owner,
     collaborators,
     email,
     setEmail,
