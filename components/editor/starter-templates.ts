@@ -1,11 +1,16 @@
-import type { CanvasEdge, CanvasNode, NodeData, NodeColorKey } from '@/types/canvas';
+import type {
+  TCanvasEdge,
+  CanvasNode,
+  NodeData,
+  NodeColorKey,
+} from '@/types/canvas';
 
 export interface CanvasTemplate {
   id: string;
   name: string;
   description: string;
   nodes: CanvasNode[];
-  edges: CanvasEdge[];
+  edges: TCanvasEdge[];
 }
 
 function createNode(
@@ -28,7 +33,7 @@ function createNode(
   };
 }
 
-function createEdge(id: string, source: string, target: string): CanvasEdge {
+function createEdge(id: string, source: string, target: string): TCanvasEdge {
   return {
     id,
     source,
@@ -42,12 +47,22 @@ export const CANVAS_TEMPLATES: CanvasTemplate[] = [
   {
     id: 'microservices',
     name: 'Microservices architecture',
-    description: 'A gateway routes requests to independent services backed by shared infrastructure.',
+    description:
+      'A gateway routes requests to independent services backed by shared infrastructure.',
     nodes: [
       createNode('gateway', 'API Gateway', 'hexagon', 'blue', 0, 100, 170, 100),
       createNode('users', 'Users service', 'rectangle', 'teal', 260, 0),
       createNode('orders', 'Orders service', 'rectangle', 'purple', 260, 120),
-      createNode('database', 'Database', 'cylinder', 'orange', 560, 120, 170, 110),
+      createNode(
+        'database',
+        'Database',
+        'cylinder',
+        'orange',
+        560,
+        120,
+        170,
+        110,
+      ),
       createNode('events', 'Event bus', 'pill', 'green', 560, 0),
     ],
     edges: [
@@ -61,13 +76,23 @@ export const CANVAS_TEMPLATES: CanvasTemplate[] = [
   {
     id: 'cicd',
     name: 'CI/CD pipeline',
-    description: 'Code moves through validation, packaging, and deployment into production.',
+    description:
+      'Code moves through validation, packaging, and deployment into production.',
     nodes: [
       createNode('commit', 'Commit', 'circle', 'blue', 0, 80, 110, 110),
       createNode('build', 'Build', 'rectangle', 'purple', 190, 95),
       createNode('test', 'Test', 'diamond', 'orange', 410, 75, 170, 120),
       createNode('deploy', 'Deploy', 'pill', 'green', 650, 100),
-      createNode('production', 'Production', 'cylinder', 'teal', 890, 85, 170, 110),
+      createNode(
+        'production',
+        'Production',
+        'cylinder',
+        'teal',
+        890,
+        85,
+        170,
+        110,
+      ),
     ],
     edges: [
       createEdge('commit-build', 'commit', 'build'),
@@ -79,13 +104,39 @@ export const CANVAS_TEMPLATES: CanvasTemplate[] = [
   {
     id: 'event-driven',
     name: 'Event-driven system',
-    description: 'Producers publish events to a broker that fans out work to independent consumers.',
+    description:
+      'Producers publish events to a broker that fans out work to independent consumers.',
     nodes: [
       createNode('producer', 'Producer', 'pill', 'blue', 0, 110),
-      createNode('broker', 'Message broker', 'cylinder', 'orange', 280, 85, 190, 130),
+      createNode(
+        'broker',
+        'Message broker',
+        'cylinder',
+        'orange',
+        280,
+        85,
+        190,
+        130,
+      ),
       createNode('worker', 'Worker', 'rectangle', 'green', 570, 0),
-      createNode('notifications', 'Notifications', 'rectangle', 'pink', 570, 130),
-      createNode('analytics', 'Analytics', 'hexagon', 'purple', 850, 65, 180, 110),
+      createNode(
+        'notifications',
+        'Notifications',
+        'rectangle',
+        'pink',
+        570,
+        130,
+      ),
+      createNode(
+        'analytics',
+        'Analytics',
+        'hexagon',
+        'purple',
+        850,
+        65,
+        180,
+        110,
+      ),
     ],
     edges: [
       createEdge('producer-broker', 'producer', 'broker'),
