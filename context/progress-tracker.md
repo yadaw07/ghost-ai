@@ -1,10 +1,10 @@
 ## Current Phase
 
-- Feature 18: Starter Template Library — Implementing predefined architecture templates with collaborative canvas replacement import. (completed)
+- Feature 19: Presence Avatars and Live Cursors — Implementing collaborator avatar stacks and live cursor overlays in the editor canvas while leaving the editor home navbar untouched. (completed)
 
 ## Current Goal
 
-- Implement starter templates as specified in feature-spec 18 (completed).
+- Implement presence avatars and live cursor tracking as specified in feature-spec 19 (completed).
 
 ## Completed
 
@@ -27,10 +27,11 @@
 - Feature 16: Replace the default canvas edges with custom edges that feel easier to follow, easier to click, and support inline labels.
 - Feature 17: Canvas Ergonomics — Added floating control bar for zoom and undo/redo, implemented keyboard shortcuts for zoom and history, and removed the minimap.
 - Feature 18: Starter Template Library — Added three predefined templates, lightweight SVG previews, navbar import entry point, and collaborative replacement imports with automatic fit view.
+- Feature 19: Presence Avatars and Live Cursors — Added a canvas-only presence stack, collaborator avatar overflow handling, current-user filtering, and live cursor broadcasting with Liveblocks presence updates while keeping the shared editor/navbar unchanged.
 
 ## Next Up
 
-- Feature-19 (TBD).
+- Feature 20: AI Sidebar Shell — Implement the floating AI chat sidebar with a tabbed layout for the AI Architect and Specs, including empty states, starter chips, and a demo spec card.
 
 ## Open Questions
 
@@ -53,3 +54,4 @@
 - Feature 05 added the Prisma project data layer with Project and ProjectCollaborator models, Prisma client singleton, and initial migration.
 - Feature 09 follow-up: Share dialog now shows the Clerk-enriched project owner before collaborators with an Owner badge.
 - Feature 17 follow-up: Project sidebar now overlays the canvas, with canvas controls rendered beneath it.
+- Feature 19 follow-up: Liveblocks presence is now aligned with the spec using a `thinking` field and canvas-only presence UI that excludes the current Clerk user.

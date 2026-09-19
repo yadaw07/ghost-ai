@@ -1,11 +1,13 @@
 import { redirect } from 'next/navigation';
+
 import {
   getCurrentClerkIdentity,
   checkProjectAccess,
   getProjectById,
 } from '@/lib/project-access';
-import { AccessDenied } from '@/components/editor/access-denied';
 import { getProjectsForUser } from '@/lib/projects';
+
+import { AccessDenied } from '@/components/editor/access-denied';
 import { WorkspaceClient } from './WorkspaceClient';
 
 export default async function WorkspacePage({

@@ -78,7 +78,6 @@ export async function POST(request: Request) {
     { userId, groupIds: [] },
     {
       userInfo: {
-        id: userId,
         name,
         avatar: user?.imageUrl ?? '',
         color,

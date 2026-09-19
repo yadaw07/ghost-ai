@@ -19,7 +19,7 @@ import {
 import '@xyflow/react/dist/style.css';
 
 import { useLiveblocksFlow } from '@liveblocks/react-flow';
-import { useHistory } from '@liveblocks/react';
+import { useHistory, useMyPresence } from '@liveblocks/react';
 
 import { ShapeNode } from './nodes/ShapeNode';
 import { CanvasEdge } from './edges/CanvasEdge';
@@ -37,6 +37,9 @@ import {
 } from '@/types/canvas';
 import { cn } from '@/lib/utils';
 import type { CanvasTemplate } from '@/components/editor/starter-templates';
+
+import { CollaboratorAvatars } from './CollaboratorAvatars';
+import { LiveCursors } from './LiveCursors';
 
 const nodeTypes = {
   shape: ShapeNode,
@@ -83,12 +86,36 @@ export function CollaborativeCanvas({
 
   const { undo, redo, canUndo, canRedo } = useHistory();
 
+  const [, updateMyPresence] = useMyPresence();
+
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, onDelete } =
     useLiveblocksFlow<CanvasNode, TCanvasEdge>({ suspense: true });
 
   const handleFitView = useCallback(() => {
     fitView({ duration: 200 });
   }, [fitView]);
+
+  const handleCanvasMouseMove = useCallback(
+    (event: React.MouseEvent) => {
+      const rect = canvasRef.current?.getBoundingClientRect();
+
+      if (!rect) return;
+
+      updateMyPresence({
+        cursor: {
+          x: event.clientX - rect.left,
+          y: event.clientY - rect.top,
+        },
+      });
+    },
+    [updateMyPresence],
+  );
+
+  const handleCanvasMouseLeave = useCallback(() => {
+    updateMyPresence({
+      cursor: null,
+    });
+  }, [updateMyPresence]);
 
   useKeyboardShortcuts(reactFlow, undo, redo);
 
@@ -252,6 +279,8 @@ export function CollaborativeCanvas({
           onDelete={onDelete}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
+          onMouseMove={handleCanvasMouseMove}
+          onMouseLeave={handleCanvasMouseLeave}
           defaultEdgeOptions={{
             type: 'canvas',
             data: { label: '' },
@@ -267,11 +296,15 @@ export function CollaborativeCanvas({
             size={1}
             color='var(--color-border-subtle)'
           />
+          <LiveCursors />
+
           <MiniMap
             className='rounded-lg! border! border-subtle! bg-surface!'
             nodeColor='var(--color-primary)'
           />
         </ReactFlow>
+
+        <CollaboratorAvatars />
         <CanvasControls
           onZoomIn={zoomIn}
           onZoomOut={zoomOut}

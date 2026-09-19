@@ -22,7 +22,7 @@ export function CanvasWrapper({
     <LiveblocksProvider authEndpoint='/api/liveblocks-auth'>
       <RoomProvider
         id={roomId}
-        initialPresence={{ cursor: null, isThinking: false }}
+        initialPresence={{ cursor: null, thinking: false }}
       >
         <ClientSideSuspense fallback={<CanvasLoading />}>
           {/* ReactFlowProvider is required to use hooks like useReactFlow in child components */}

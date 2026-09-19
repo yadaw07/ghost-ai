@@ -42,7 +42,9 @@ export function useProjectShare({ open, projectId }: UseProjectShareProps) {
 
     fetch(`/api/projects/${projectId}/collaborators`)
       .then(async (response) => {
-        if (!response.ok) throw new Error('Unable to load collaborators.');
+        if (!response.ok) {
+          throw new Error('Unable to load collaborators.');
+        }
 
         return response.json() as Promise<{
           owner: ProjectOwner;
