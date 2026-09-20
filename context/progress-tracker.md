@@ -28,10 +28,12 @@
 - Feature 17: Canvas Ergonomics — Added floating control bar for zoom and undo/redo, implemented keyboard shortcuts for zoom and history, and removed the minimap.
 - Feature 18: Starter Template Library — Added three predefined templates, lightweight SVG previews, navbar import entry point, and collaborative replacement imports with automatic fit view.
 - Feature 19: Presence Avatars and Live Cursors — Added a canvas-only presence stack, collaborator avatar overflow handling, current-user filtering, and live cursor broadcasting with Liveblocks presence updates while keeping the shared editor/navbar unchanged.
+- Feature 20: AI Sidebar Shell — Implement the floating AI chat sidebar with a tabbed layout for the AI Architect and Specs, including empty states, starter chips, and a demo spec card.
+- Feature 21: Canvas Autosave — Implement canvas state persistence using Vercel Blob and Prisma, including autosave hooks and status indicators.
 
 ## Next Up
 
-- Feature 20: AI Sidebar Shell — Implement the floating AI chat sidebar with a tabbed layout for the AI Architect and Specs, including empty states, starter chips, and a demo spec card.
+- Feature 22 (TBD).
 
 ## Open Questions
 

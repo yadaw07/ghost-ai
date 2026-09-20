@@ -1,12 +1,6 @@
 'use client';
 
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  createContext,
-} from 'react';
+import { useCallback, useEffect, useRef, useState, createContext } from 'react';
 
 import {
   ReactFlow,
@@ -36,6 +30,7 @@ import {
   NodeColorKey,
 } from '@/types/canvas';
 import { cn } from '@/lib/utils';
+import { useCanvasAutosave, type SaveStatus } from '@/hooks/useCanvasAutosave';
 import type { CanvasTemplate } from '@/components/editor/starter-templates';
 
 import { CollaboratorAvatars } from './CollaboratorAvatars';
@@ -56,16 +51,21 @@ interface CanvasContextType {
 export const CanvasContext = createContext<CanvasContextType | null>(null);
 
 interface CollaborativeCanvasProps {
+  activeProjectId: string;
+  onSaveStatusChange: (status: SaveStatus) => void;
   templateToImport: CanvasTemplate | null;
   onTemplateImported: () => void;
 }
 
 export function CollaborativeCanvas({
+  activeProjectId,
+  onSaveStatusChange,
   templateToImport,
   onTemplateImported,
 }: CollaborativeCanvasProps) {
   const nodeCounter = useRef(0);
   const canvasRef = useRef<HTMLDivElement>(null);
+  const hasLoadedSavedState = useRef(false);
 
   const [dragPreview, setDragPreview] = useState<{
     shape: string;
@@ -90,6 +90,16 @@ export function CollaborativeCanvas({
 
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, onDelete } =
     useLiveblocksFlow<CanvasNode, TCanvasEdge>({ suspense: true });
+
+  const { status: saveStatus } = useCanvasAutosave(
+    activeProjectId,
+    nodes,
+    edges,
+  );
+
+  useEffect(() => {
+    onSaveStatusChange(saveStatus);
+  }, [saveStatus, onSaveStatusChange]);
 
   const handleFitView = useCallback(() => {
     fitView({ duration: 200 });
@@ -133,6 +143,53 @@ export function CollaborativeCanvas({
     },
     [onEdgesChange, edges],
   );
+
+  // Loading saved canvas state on mount
+  useEffect(() => {
+    async function loadSavedState() {
+      if (hasLoadedSavedState.current) return;
+      if (nodes.length > 0 || edges.length > 0) return;
+      if (!activeProjectId) return;
+
+      hasLoadedSavedState.current = true;
+
+      try {
+        const response = await fetch(`/api/projects/${activeProjectId}/canvas`);
+        if (!response.ok) return;
+
+        const data = await response.json();
+        if (data.nodes && data.edges) {
+          // Use Liveblocks mutation to update storage
+          // This is a simplification; we need to apply the nodes and edges
+          // via the provided onNodesChange and onEdgesChange handlers
+          // to ensure they are registered in the room storage.
+
+          onNodesChange([
+            ...data.nodes.map((node: CanvasNode) => ({
+              type: 'add' as const,
+              item: node,
+            })),
+          ]);
+          onEdgesChange([
+            ...data.edges.map((edge: TCanvasEdge) => ({
+              type: 'add' as const,
+              item: edge,
+            })),
+          ]);
+        }
+      } catch (error) {
+        console.error('Failed to load saved canvas state:', error);
+      }
+    }
+
+    loadSavedState();
+  }, [
+    activeProjectId,
+    nodes.length,
+    edges.length,
+    onNodesChange,
+    onEdgesChange,
+  ]);
 
   const selectedNode = nodes.find((n) => n.selected);
 

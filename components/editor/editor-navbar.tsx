@@ -8,6 +8,9 @@ import {
   Bot,
   Share2,
   Workflow,
+  Check,
+  Loader2,
+  AlertCircle,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -25,6 +28,8 @@ interface EditorNavbarProps {
   onOpenTemplates: () => void;
   /** Toggles the AI sidebar */
   toggleAiSidebar: () => void;
+  /** Current save status of the canvas */
+  saveStatus?: 'idle' | 'saving' | 'saved' | 'error';
 }
 
 /** Top navigation bar for the editor view */
@@ -35,6 +40,7 @@ export function EditorNavbar({
   onShare,
   onOpenTemplates,
   toggleAiSidebar,
+  saveStatus,
 }: EditorNavbarProps) {
   return (
     <header className='z-50 flex h-12 shrink-0 items-center justify-between border-b border-subtle bg-base px-4'>
@@ -53,14 +59,41 @@ export function EditorNavbar({
           )}
         </button>
 
-        <div className='min-w-0'>
+        <div className='min-w-0 relative group'>
           <h1 className='truncate text-sm font-medium text-foreground'>
             {projectName}
           </h1>
 
-          <p className='text-[10px] leading-none text-muted-foreground'>
-            Workspace
-          </p>
+          <div className='flex items-center gap-1.5'>
+            <p className='text-[10px] leading-none text-muted-foreground'>
+              Workspace
+            </p>
+
+            {saveStatus && saveStatus !== 'idle' && (
+              <div className='flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-subtle border border-border-subtle'>
+                {saveStatus === 'saving' && (
+                  <>
+                    <Loader2 className='h-2 w-2 animate-spin text-muted-foreground' />
+                    <span className='text-[9px] text-muted-foreground'>
+                      Saving...
+                    </span>
+                  </>
+                )}
+                {saveStatus === 'saved' && (
+                  <>
+                    <Check className='h-2 w-2 text-success' />
+                    <span className='text-[9px] text-success'>Saved</span>
+                  </>
+                )}
+                {saveStatus === 'error' && (
+                  <>
+                    <AlertCircle className='h-2 w-2 text-error' />
+                    <span className='text-[9px] text-error'>Error</span>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

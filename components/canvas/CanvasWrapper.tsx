@@ -9,12 +9,16 @@ import type { CanvasTemplate } from '@/components/editor/starter-templates';
 
 interface CanvasWrapperProps {
   roomId: string;
+  activeProjectId: string;
+  onSaveStatusChange: (status: 'idle' | 'saving' | 'saved' | 'error') => void;
   templateToImport: CanvasTemplate | null;
   onTemplateImported: () => void;
 }
 
 export function CanvasWrapper({
   roomId,
+  activeProjectId,
+  onSaveStatusChange,
   templateToImport,
   onTemplateImported,
 }: CanvasWrapperProps) {
@@ -28,6 +32,8 @@ export function CanvasWrapper({
           {/* ReactFlowProvider is required to use hooks like useReactFlow in child components */}
           <ReactFlowProvider>
             <CollaborativeCanvas
+              activeProjectId={activeProjectId}
+              onSaveStatusChange={onSaveStatusChange}
               templateToImport={templateToImport}
               onTemplateImported={onTemplateImported}
             />

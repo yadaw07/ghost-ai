@@ -16,6 +16,7 @@ import { StarterTemplatesModal } from '@/components/editor/starter-templates-mod
 
 import { CanvasWrapper } from '@/components/canvas/CanvasWrapper';
 import { useProjectActions, type Project } from '@/hooks/useProjectActions';
+import { useCanvasAutosave } from '@/hooks/useCanvasAutosave';
 
 interface WorkspaceClientProps {
   projectName: string;
@@ -41,6 +42,17 @@ export function WorkspaceClient({
 
   const actions = useProjectActions();
 
+  // Autosave hook
+  // We pass an empty array for nodes/edges here because the actual
+  // data is managed by Liveblocks inside CollaborativeCanvas.
+  // To properly trigger autosave, we need the current state.
+  // Since we don't have access to Liveblocks state here,
+  // we'll move the autosave hook inside CollaborativeCanvas.
+  // However, the save status needs to be displayed in the Navbar.
+  // We'll use a simple state and a callback.
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
+
   return (
     <div className='flex h-screen flex-col overflow-hidden bg-background'>
       {/* Top navbar */}
@@ -51,6 +63,7 @@ export function WorkspaceClient({
         onShare={() => setIsShareDialogOpen(true)}
         onOpenTemplates={() => setIsTemplatesModalOpen(true)}
         toggleAiSidebar={() => setIsAiSidebarOpen((prev) => !prev)}
+        saveStatus={saveStatus}
       />
 
       {/* Workspace */}
@@ -74,6 +87,8 @@ export function WorkspaceClient({
         <main className='relative z-0 flex min-w-0 flex-1 items-center justify-center overflow-hidden rounded-2xl border border-subtle bg-base'>
           <CanvasWrapper
             roomId={roomId}
+            activeProjectId={activeProjectId}
+            onSaveStatusChange={setSaveStatus}
             templateToImport={templateToImport}
             onTemplateImported={() => setTemplateToImport(null)}
           />
