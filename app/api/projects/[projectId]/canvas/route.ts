@@ -1,4 +1,4 @@
-import { put } from '@vercel/blob';
+import { put, get } from '@vercel/blob';
 
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
@@ -7,7 +7,7 @@ import { prisma } from '@/lib/prisma';
 
 export async function PUT(
   request: Request,
-  { params }: { params: { projectId: string } },
+  { params }: { params: Promise<{ projectId: string }> },
 ) {
   try {
     const { userId } = await auth();
@@ -15,7 +15,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { projectId } = params;
+    const { projectId } = await params;
 
     // Verify project membership/ownership
     const project = await prisma.project.findFirst({
@@ -40,21 +40,22 @@ export async function PUT(
     }
 
     const canvasData = JSON.stringify({ nodes, edges });
-    const filename = `canvas/${projectId}-${Date.now()}.json`;
+    const pathname = `canvas/${projectId}.json`;
 
     // Upload to Vercel Blob
-    const { url } = await put(filename, canvasData, {
-      access: 'public',
+    await put(pathname, canvasData, {
+      access: 'private',
       contentType: 'application/json',
+      allowOverwrite: true,
     });
 
     // Update project record with the new blob URL
     await prisma.project.update({
       where: { id: projectId },
-      data: { canvasJsonPath: url },
+      data: { canvasJsonPath: pathname },
     });
 
-    return NextResponse.json({ url }, { status: 200 });
+    return NextResponse.json({ pathname }, { status: 200 });
   } catch (error) {
     console.error('Canvas Save Error:', error);
     return NextResponse.json(
@@ -66,7 +67,7 @@ export async function PUT(
 
 export async function GET(
   request: Request,
-  { params }: { params: { projectId: string } },
+  { params }: { params: Promise<{ projectId: string }> },
 ) {
   try {
     const { userId } = await auth();
@@ -74,7 +75,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { projectId } = params;
+    const { projectId } = await params;
 
     const project = await prisma.project.findFirst({
       where: {
@@ -91,13 +92,21 @@ export async function GET(
       return NextResponse.json({ nodes: [], edges: [] }, { status: 200 });
     }
 
-    // Fetch from vercel blob
-    const response = await fetch(project.canvasJsonPath);
-    if (!response.ok) {
-      throw new Error('Failed to fetch canvas blob');
+    // Get from vercel blob
+    const result = await get(project.canvasJsonPath, {
+      access: 'private',
+      useCache: false,
+    });
+
+    if (!result || result.statusCode !== 200 || !result.stream) {
+      return NextResponse.json(
+        { error: 'Canvas blob not found' },
+        { status: 404 },
+      );
     }
 
-    const data = await response.json();
+    const data = await new Response(result.stream).json();
+
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
     console.error('Canvas Load Error:', error);

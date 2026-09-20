@@ -4,7 +4,11 @@ import { useState, useEffect } from 'react';
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
-export function useCanvasAutosave(projectId: string, nodes: any[], edges: any[]) {
+export function useCanvasAutosave(
+  projectId: string,
+  nodes: any[],
+  edges: any[],
+) {
   const [status, setStatus] = useState<SaveStatus>('idle');
 
   useEffect(() => {
@@ -12,6 +16,7 @@ export function useCanvasAutosave(projectId: string, nodes: any[], edges: any[])
 
     const timer = setTimeout(async () => {
       setStatus('saving');
+
       try {
         const response = await fetch(`/api/projects/${projectId}/canvas`, {
           method: 'PUT',
@@ -19,11 +24,14 @@ export function useCanvasAutosave(projectId: string, nodes: any[], edges: any[])
           body: JSON.stringify({ nodes, edges }),
         });
 
-        if (!response.ok) throw new Error('Save failed');
+        if (!response.ok) {
+          throw new Error('Save failed');
+        }
 
         setStatus('saved');
+
         // Reset to idle after a few seconds
-        setTimeout(() => setStatus('idle'), 3000);
+        setTimeout(() => setStatus('idle'), 2000);
       } catch (error) {
         console.error('Autosave error:', error);
         setStatus('error');

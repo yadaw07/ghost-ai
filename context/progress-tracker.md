@@ -1,10 +1,10 @@
 ## Current Phase
 
-- Feature 19: Presence Avatars and Live Cursors — Implementing collaborator avatar stacks and live cursor overlays in the editor canvas while leaving the editor home navbar untouched. (completed)
+- Feature 21: Canvas Autosave. (completed)
 
 ## Current Goal
 
-- Implement presence avatars and live cursor tracking as specified in feature-spec 19 (completed).
+- Feature 22 (TBD).
 
 ## Completed
 
@@ -30,6 +30,10 @@
 - Feature 19: Presence Avatars and Live Cursors — Added a canvas-only presence stack, collaborator avatar overflow handling, current-user filtering, and live cursor broadcasting with Liveblocks presence updates while keeping the shared editor/navbar unchanged.
 - Feature 20: AI Sidebar Shell — Implement the floating AI chat sidebar with a tabbed layout for the AI Architect and Specs, including empty states, starter chips, and a demo spec card.
 - Feature 21: Canvas Autosave — Implement canvas state persistence using Vercel Blob and Prisma, including autosave hooks and status indicators.
+
+## In Progress
+
+- None .
 
 ## Next Up
 

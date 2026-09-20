@@ -11,6 +11,7 @@ import {
   Check,
   Loader2,
   AlertCircle,
+  Save,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -68,37 +69,48 @@ export function EditorNavbar({
             <p className='text-[10px] leading-none text-muted-foreground'>
               Workspace
             </p>
-
-            {saveStatus && saveStatus !== 'idle' && (
-              <div className='flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-subtle border border-border-subtle'>
-                {saveStatus === 'saving' && (
-                  <>
-                    <Loader2 className='h-2 w-2 animate-spin text-muted-foreground' />
-                    <span className='text-[9px] text-muted-foreground'>
-                      Saving...
-                    </span>
-                  </>
-                )}
-                {saveStatus === 'saved' && (
-                  <>
-                    <Check className='h-2 w-2 text-success' />
-                    <span className='text-[9px] text-success'>Saved</span>
-                  </>
-                )}
-                {saveStatus === 'error' && (
-                  <>
-                    <AlertCircle className='h-2 w-2 text-error' />
-                    <span className='text-[9px] text-error'>Error</span>
-                  </>
-                )}
-              </div>
-            )}
           </div>
         </div>
       </div>
 
       {/* Right side */}
-      <div className='flex items-center gap-2'>
+      <div className='flex items-center gap-1.5'>
+        {saveStatus === 'idle' || !saveStatus ? (
+          <Save className='h-4 w-4 text-muted-foreground' />
+        ) : (
+          <div
+            className='flex h-8 items-center gap-1.5 rounded-md border border-border-subtle bg-subtle px-2.5'
+            aria-live='polite'
+          >
+            {saveStatus === 'saving' && (
+              <>
+                <Loader2 className='h-3.5 w-3.5 animate-spin text-muted-foreground' />
+                <span className='hidden text-[11px] text-muted-foreground sm:inline'>
+                  Saving...
+                </span>
+              </>
+            )}
+
+            {saveStatus === 'saved' && (
+              <>
+                <Check className='h-3.5 w-3.5 text-success' />
+                <span className='hidden text-[11px] text-success sm:inline'>
+                  Saved
+                </span>
+              </>
+            )}
+
+            {saveStatus === 'error' && (
+              <>
+                <AlertCircle className='h-3.5 w-3.5 text-error' />
+                <span className='hidden text-[11px] text-error sm:inline'>
+                  Save failed
+                </span>
+              </>
+            )}
+          </div>
+        )}
+
         <Button
           variant='ghost'
           size='sm'

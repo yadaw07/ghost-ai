@@ -24,65 +24,73 @@ export function CollaboratorAvatars() {
 
   const currentUserId = user?.id ?? null;
 
-  const collaborators = others.filter(
-    (other) => other.id !== currentUserId,
-  );
+  const collaborators = others.filter((other) => other.id !== currentUserId);
 
   const visibleCollaborators = collaborators.slice(0, 5);
   const overflowCount = Math.max(collaborators.length - 5, 0);
 
   return (
-    <div className="absolute right-4 top-4 z-20 flex items-center">
+    <div className='absolute right-4 top-4 z-20 flex items-center'>
       {collaborators.length > 0 && (
-        <div className="flex items-center pr-3">
-          <div className="flex items-center">
-            {visibleCollaborators.map((collaborator, index) => {
-              const name = collaborator.info?.name || 'Anonymous';
-              const avatar = collaborator.info?.avatar;
+        <>
+          <span className='mr-3 text-[10px] font-medium text-muted-foreground'>
+            Participants
+          </span>
 
-              return (
+          <div className='flex items-center pr-3'>
+            <div className='flex items-center'>
+              {visibleCollaborators.map((collaborator, index) => {
+                const name = collaborator.info?.name || 'Anonymous';
+                const avatar = collaborator.info?.avatar;
+
+                return (
+                  <div
+                    key={collaborator.connectionId}
+                    className='relative'
+                    style={{
+                      marginLeft: index === 0 ? 0 : -8,
+                    }}
+                  >
+                    {avatar ? (
+                      <img
+                        src={avatar}
+                        alt={name}
+                        className={`${AVATAR_SIZE} rounded-full object-cover ring-2 ring-base`}
+                      />
+                    ) : (
+                      <div
+                        className={`${AVATAR_SIZE} flex items-center justify-center rounded-full text-[10px] font-semibold text-white ring-2 ring-base`}
+                        style={{
+                          backgroundColor:
+                            collaborator.info?.color ?? '#6366f1',
+                        }}
+                      >
+                        {getInitials(name)}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              {overflowCount > 0 && (
                 <div
-                  key={collaborator.connectionId}
-                  className="relative"
-                  style={{
-                    marginLeft: index === 0 ? 0 : -8,
-                  }}
+                  className={`${AVATAR_SIZE} -ml-2 flex items-center justify-center rounded-full bg-surface text-xs font-medium text-foreground ring-2 ring-base`}
                 >
-                  {avatar ? (
-                    <img
-                      src={avatar}
-                      alt={name}
-                      className={`${AVATAR_SIZE} rounded-full object-cover ring-2 ring-base`}
-                    />
-                  ) : (
-                    <div
-                      className={`${AVATAR_SIZE} flex items-center justify-center rounded-full text-[10px] font-semibold text-white ring-2 ring-base`}
-                      style={{
-                        backgroundColor:
-                          collaborator.info?.color ?? '#6366f1',
-                      }}
-                    >
-                      {getInitials(name)}
-                    </div>
-                  )}
+                  +{overflowCount}
                 </div>
-              );
-            })}
-
-            {overflowCount > 0 && (
-              <div
-                className={`${AVATAR_SIZE} -ml-2 flex items-center justify-center rounded-full bg-surface text-xs font-medium text-foreground ring-2 ring-base`}
-              >
-                +{overflowCount}
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {collaborators.length > 0 && (
-        <div className="mr-3 h-6 w-px bg-border-subtle" />
+        <div className='mr-3 h-6 w-px bg-border-subtle' />
       )}
+
+      <div className='mr-2 text-[10px] font-medium text-muted-foreground'>
+        You
+      </div>
 
       <UserButton
         appearance={{
