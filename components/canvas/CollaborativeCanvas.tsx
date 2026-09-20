@@ -127,7 +127,14 @@ export function CollaborativeCanvas({
     });
   }, [updateMyPresence]);
 
-  useKeyboardShortcuts(reactFlow, undo, redo);
+  const handleKeyboardDelete = useCallback(() => {
+    onDelete({
+      nodes: nodes.filter((node) => node.selected),
+      edges: edges.filter((edge) => edge.selected),
+    });
+  }, [onDelete, nodes, edges]);
+
+  useKeyboardShortcuts(reactFlow, undo, redo, handleKeyboardDelete);
 
   const handleLabelChange = useCallback(
     (edgeId: string, newLabel: string) => {

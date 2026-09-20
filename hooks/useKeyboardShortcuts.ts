@@ -6,6 +6,7 @@ export function useKeyboardShortcuts(
   flowInstance: ReactFlowInstance | null,
   undo: () => void,
   redo: () => void,
+  onDelete?: () => void,
 ) {
   useEffect(() => {
     if (!flowInstance) return;
@@ -23,8 +24,16 @@ export function useKeyboardShortcuts(
 
       const isMod = event.ctrlKey || event.metaKey;
 
+      // Delete: Delete or Backspace
+      if (
+        (event.key === 'Delete' || event.key === 'Backspace') &&
+        onDelete
+      ) {
+        event.preventDefault();
+        onDelete();
+      }
       // Zoom in: + or =
-      if (event.key === '+' || event.key === '=') {
+      else if (event.key === '+' || event.key === '=') {
         event.preventDefault();
         flowInstance.zoomIn();
       }
@@ -50,5 +59,5 @@ export function useKeyboardShortcuts(
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [flowInstance, undo, redo]);
+  }, [flowInstance, undo, redo, onDelete]);
 }

@@ -76,7 +76,12 @@ export function EditorNavbar({
       {/* Right side */}
       <div className='flex items-center gap-1.5'>
         {saveStatus === 'idle' || !saveStatus ? (
-          <Save className='h-4 w-4 text-muted-foreground' />
+          <div className='flex h-8 items-center gap-1.5 rounded-md border border-border-subtle bg-subtle px-2.5'>
+            <Save className='h-3.5 w-3.5 text-muted-foreground' />
+            <span className='hidden text-[11px] text-muted-foreground sm:inline'>
+              Save
+            </span>
+          </div>
         ) : (
           <div
             className='flex h-8 items-center gap-1.5 rounded-md border border-border-subtle bg-subtle px-2.5'
