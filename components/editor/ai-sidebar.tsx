@@ -3,6 +3,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bot, X, Send, FileText, Download } from 'lucide-react';
 
+import { cn } from '@/lib/utils';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -18,9 +20,16 @@ interface Message {
   text: string;
 }
 
+const tabTrigger =
+  'rounded-full px-3 text-[11px] font-medium text-muted-foreground transition-colors';
+
+const tabTriggerActive =
+  'bg-accent-ai-text! text-white! border-transparent! shadow-sm';
+
 export function AISidebar({ isOpen, onClose }: AISidebarProps) {
   const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
+  const [tab, setTab] = useState('architect');
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -54,7 +63,7 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
   if (!isOpen) return null;
 
   return (
-    <aside className='flex h-full w-72 shrink-0 flex-col overflow-hidden rounded-2xl border border-border-subtle bg-surface/95 shadow-xl'>
+    <aside className='flex h-full min-h-0 w-75 shrink-0 flex-col overflow-hidden rounded-2xl border border-border-subtle bg-surface/95 shadow-xl'>
       {/* Header */}
       <header className='flex h-16 shrink-0 items-center justify-between border-b border-border-subtle px-4'>
         <div className='flex items-center gap-2'>
@@ -81,26 +90,25 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
       </header>
 
       <Tabs
-        defaultValue='architect'
-        className='flex flex-1 flex-col overflow-hidden'
+        value={tab}
+        onValueChange={setTab}
+        className='flex min-h-0 flex-1 flex-col overflow-hidden'
       >
         <div className='px-4 pt-4'>
           <TabsList className='flex h-8 w-fit rounded-full bg-base p-0.5'>
             <TabsTrigger
               value='architect'
-              className='rounded-full px-3 text-[11px] text-muted-foreground transition-colors
-      data-[state=active]:bg-accent-ai-text
-      data-[state=active]:text-white
-      data-[state=active]:shadow-sm'
+              className={cn(
+                tabTrigger,
+                tab === 'architect' && tabTriggerActive,
+              )}
             >
               AI Architect
             </TabsTrigger>
 
             <TabsTrigger
               value='specs'
-              className='rounded-full px-3 text-[11px] text-muted-foreground transition-colors
-      data-[state=active]:bg-transparent
-      data-[state=active]:text-foreground'
+              className={cn(tabTrigger, tab === 'specs' && tabTriggerActive)}
             >
               Specs
             </TabsTrigger>
@@ -109,12 +117,12 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
 
         <TabsContent
           value='architect'
-          className='flex flex-1 flex-col overflow-hidden p-4 pt-4'
+          className='flex min-h-0 flex-1 flex-col overflow-hidden p-4 pt-4'
         >
-          <ScrollArea className='flex-1 pr-3'>
+          <ScrollArea className='min-h-0 flex-1 pr-3'>
             <div className='flex min-h-full flex-col gap-3 py-4'>
               {messages.length === 0 ? (
-                <div className='flex flex-1 flex-col items-center justify-center py-10 text-center'>
+                <div className='flex flex-1 flex-col items-center justify-center py-6 text-center'>
                   <div className='mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-primary/10'>
                     <Bot className='h-6 w-6 text-accent-primary' />
                   </div>
@@ -156,7 +164,7 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
           </ScrollArea>
 
           {/* Input Area */}
-          <div className='mt-4 border-t border-border-subtle/60 pt-3'>
+          <div className='mt-4 shrink-0 border-t border-border-subtle/60 pt-3'>
             <div className='flex items-end gap-2 rounded-2xl bg-base p-2'>
               <Textarea
                 ref={textareaRef}
