@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Bot, X, Send, FileText, Download } from 'lucide-react';
+import { Bot, X, Send, FileText, Download, Loader2 } from 'lucide-react';
+import { useFeedMessages } from '@liveblocks/react';
 
 import { cn } from '@/lib/utils';
+import { AIStatusPayload } from '@/types/tasks';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -32,6 +34,14 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
   const [tab, setTab] = useState('architect');
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const { messages: aiMessages } = useFeedMessages('ai-status-feed');
+
+  const aiStatus = aiMessages?.[aiMessages.length - 1];
+  const aiStatusData = aiStatus?.data as AIStatusPayload | undefined;
+
+  const isAiThinking =
+    aiStatusData?.status === 'started' || aiStatusData?.status === 'processing';
 
   // Auto-resize textarea
   useEffect(() => {
@@ -70,13 +80,23 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
           <div className='flex h-7 w-7 items-center justify-center rounded-lg bg-accent-primary/10'>
             <Bot className='h-4 w-4 text-accent-primary' />
           </div>
-          <div>
+          <div className='flex flex-col'>
             <h2 className='text-sm font-medium text-foreground'>
               AI Workspace
             </h2>
-            <p className='text-[10px] text-muted-foreground'>
-              Collaborate with Ghost AI
-            </p>
+            <div className='flex items-center gap-1.5'>
+              <p className='text-[10px] text-muted-foreground'>
+                Collaborate with Ghost AI
+              </p>
+              {isAiThinking && (
+                <div className='flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-accent-primary/10 text-accent-primary border border-accent-primary/20'>
+                  <Loader2 className='h-2 w-2 animate-spin' />
+                  <span className='text-[9px] font-medium leading-none'>
+                    {aiStatusData?.message ?? 'Thinking...'}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
         <Button
@@ -171,16 +191,29 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder='Ask AI Architect...'
-                className='min-h-18 max-h-40 resize-none border-0 bg-transparent p-2 text-xs focus-visible:ring-0'
+                placeholder={
+                  isAiThinking ? 'AI is thinking...' : 'Ask AI Architect...'
+                }
+                className={cn(
+                  'min-h-18 max-h-40 resize-none border-0 bg-transparent p-2 text-xs focus-visible:ring-0',
+                  isAiThinking && 'opacity-50 cursor-not-allowed',
+                )}
+                disabled={isAiThinking}
               />
 
               <Button
                 size='icon'
-                className='h-10 w-10 shrink-0 rounded-xl bg-accent-primary text-background hover:bg-accent-primary/90'
-                disabled={!inputValue.trim()}
+                className={cn(
+                  'h-10 w-10 shrink-0 rounded-xl bg-accent-primary text-background hover:bg-accent-primary/90',
+                  isAiThinking && 'opacity-50 cursor-not-allowed',
+                )}
+                disabled={!inputValue.trim() || isAiThinking}
               >
-                <Send className='h-4 w-4' />
+                {isAiThinking ? (
+                  <Loader2 className='h-4 w-4 animate-spin' />
+                ) : (
+                  <Send className='h-4 w-4' />
+                )}
               </Button>
             </div>
           </div>

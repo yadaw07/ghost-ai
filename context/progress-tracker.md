@@ -1,10 +1,10 @@
 ## Current Phase
 
-- Feature 23: Design Agent Logic. (in progress)
+- Feature 24: AI Presence State. (completed)
 
 ## Current Goal
 
-- Implement full AI design agent logic in `trigger/design-agent.ts` using Gemini to generate architecture and update the collaborative canvas via Liveblocks.
+- Feature 25. (TBD)
 
 ## Completed
 
@@ -31,6 +31,7 @@
 - Feature 20: AI Sidebar Shell — Implement the floating AI chat sidebar with a tabbed layout for the AI Architect and Specs, including empty states, starter chips, and a demo spec card.
 - Feature 21: Canvas Autosave — Implement canvas state persistence using Vercel Blob and Prisma, including autosave hooks and status indicators.
 - Feature 22: Design Agent API — implemented backend flow for design generation using Trigger.dev, including task triggering, run tracking via Prisma TaskRun model, and run-scoped token issuance.
+- Feature 23: Design Agent Logic — Implement full AI design agent logic in `trigger/design-agent.ts` using Gemini to generate architecture and update the collaborative canvas via Liveblocks.
 
 ## In Progress
 
@@ -38,7 +39,7 @@
 
 ## Next Up
 
-- Feature 23 (TBD).
+- Feature 24 (TBD).
 
 ## Open Questions
 
