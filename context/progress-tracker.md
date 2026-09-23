@@ -1,10 +1,10 @@
 ## Current Phase
 
-- Feature 24: AI Presence State. (completed)
+- Feature 27 (TBD).
 
 ## Current Goal
 
-- Feature 25. (TBD)
+- (To be defined based on the next feature).
 
 ## Completed
 
@@ -32,6 +32,9 @@
 - Feature 21: Canvas Autosave — Implement canvas state persistence using Vercel Blob and Prisma, including autosave hooks and status indicators.
 - Feature 22: Design Agent API — implemented backend flow for design generation using Trigger.dev, including task triggering, run tracking via Prisma TaskRun model, and run-scoped token issuance.
 - Feature 23: Design Agent Logic — Implement full AI design agent logic in `trigger/design-agent.ts` using Gemini to generate architecture and update the collaborative canvas via Liveblocks.
+- Feature 24: AI Presence State — Add shared AI activity indicators so everyone in the room can see when generation is in progress. This unit is only for UI, presence, and realtime status signals.
+- Feature 25: Sidebar Chat Feed — Implement real-time room chat in the AI sidebar using a dedicated Liveblocks `ai-chat` feed.
+- Feature 26: Design Agent Frontend — Wired up AI sidebar to submit design prompts, track real-time run status via `@trigger.dev/react-hooks`, and display status updates in a compact UI strip.
 
 ## In Progress
 
@@ -39,7 +42,7 @@
 
 ## Next Up
 
-- Feature 24 (TBD).
+- Feature 27 (TBD).
 
 ## Open Questions
 

@@ -1,11 +1,15 @@
 'use client';
 
+import { useUser } from '@clerk/nextjs';
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Bot, X, Send, FileText, Download, Loader2 } from 'lucide-react';
+
 import { useFeedMessages } from '@liveblocks/react';
+import { useRealtimeRun } from '@trigger.dev/react-hooks';
 
 import { cn } from '@/lib/utils';
-import { AIStatusPayload } from '@/types/tasks';
+import { AIStatusPayload, AIChatMessageSchema } from '@/types/tasks';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -13,13 +17,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface AISidebarProps {
+  roomId: string;
   isOpen: boolean;
   onClose: () => void;
-}
-
-interface Message {
-  id: number;
-  text: string;
 }
 
 const tabTrigger =
@@ -28,20 +28,61 @@ const tabTrigger =
 const tabTriggerActive =
   'bg-accent-ai-text! text-white! border-transparent! shadow-sm';
 
-export function AISidebar({ isOpen, onClose }: AISidebarProps) {
+export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
+  const { user } = useUser();
+
   const [inputValue, setInputValue] = useState('');
-  const [messages, setMessages] = useState<Message[]>([]);
   const [tab, setTab] = useState('architect');
+  const [isSending, setIsSending] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
+  const [runState, setRunState] = useState<{
+    runId: string;
+    token: string;
+  } | null>(null);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const { messages: aiMessages } = useFeedMessages('ai-status-feed');
+  const { messages: aiStatusMessages } = useFeedMessages('ai-status-feed');
+  const { messages: aiChatMessages } = useFeedMessages('ai-chat');
 
-  const aiStatus = aiMessages?.[aiMessages.length - 1];
+  const { run, error: runError } = useRealtimeRun(runState?.runId ?? '', {
+    accessToken: runState?.token ?? '',
+    enabled: !!runState?.runId,
+    onComplete: async () => {
+      const response = await fetch('/api/ai-chat/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          roomId,
+          content: 'Architecture design complete.',
+          role: 'ai',
+        }),
+      });
+
+      if (!response.ok) {
+        console.error('Failed to send AI completion message');
+      }
+
+      setRunState(null);
+    },
+  });
+
+  const aiStatus = aiStatusMessages?.[aiStatusMessages.length - 1];
   const aiStatusData = aiStatus?.data as AIStatusPayload | undefined;
 
+  const isRunActive = !!runState;
   const isAiThinking =
     aiStatusData?.status === 'started' || aiStatusData?.status === 'processing';
+
+  // Validate and filter chat messages
+  const validatedChatMessages = React.useMemo(() => {
+    return (aiChatMessages || [])
+      .map((m) => AIChatMessageSchema.safeParse(m.data))
+      .filter((result) => result.success)
+      .map((result) => result.data);
+  }, [aiChatMessages]);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -51,22 +92,84 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
     }
   }, [inputValue]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = async (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
+      await handleSendMessage();
+    }
+  };
 
-      const text = inputValue.trim();
-      if (!text) return;
+  const handleSendMessage = async () => {
+    const text = inputValue.trim();
+    if (!text || isSending) return;
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          text,
+    setIsSending(true);
+    setSendError(null);
+
+    try {
+      // 1. Push user's message to collaborative chat
+      const chatResponse = await fetch('/api/ai-chat/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      ]);
+        body: JSON.stringify({
+          roomId,
+          content: text,
+          senderId: user?.id,
+          senderName: user?.fullName ?? user?.username ?? 'You',
+        }),
+      });
+
+      if (!chatResponse.ok) {
+        throw new Error('Failed to send chat message');
+      }
+
+      // 2. Start AI design run
+      const response = await fetch('/api/ai/design', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: text,
+          roomId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit design prompt');
+      }
+
+      const data = await response.json();
+
+      // 3. Track Trigger.dev run
+      setRunState({
+        runId: data.runId,
+        token: data.publicToken,
+      });
 
       setInputValue('');
+    } catch (err) {
+      setSendError('Failed to submit prompt. Please try again.');
+      console.error('Failed to submit prompt.', err);
+
+      try {
+        await fetch('/api/ai-chat/send', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            roomId,
+            role: 'ai',
+            content:
+              'I couldn’t start the architecture generation. Please try again.',
+          }),
+        });
+      } catch (chatError) {
+        console.error('Failed to send error message to AI chat:', chatError);
+      }
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -141,7 +244,7 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
         >
           <ScrollArea className='min-h-0 flex-1 pr-3'>
             <div className='flex min-h-full flex-col gap-3 py-4'>
-              {messages.length === 0 ? (
+              {validatedChatMessages.length === 0 ? (
                 <div className='flex flex-1 flex-col items-center justify-center py-6 text-center'>
                   <div className='mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-primary/10'>
                     <Bot className='h-6 w-6 text-accent-primary' />
@@ -172,10 +275,34 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
                   </div>
                 </div>
               ) : (
-                messages.map((message) => (
-                  <div key={message.id} className='flex justify-end'>
-                    <div className='max-w-[85%] rounded-2xl border border-accent-primary/30 bg-accent-primary/5 px-3 py-2 text-xs text-foreground'>
-                      {message.text}
+                validatedChatMessages.map((message, index) => (
+                  <div
+                    key={`${message.senderId}-${message.timestamp}-${index}`}
+                    className={cn(
+                      'flex flex-col',
+                      message.role === 'user' ? 'items-end' : 'items-start',
+                    )}
+                  >
+                    <div className='flex items-center gap-2 mb-1'>
+                      <span className='text-[10px] font-medium text-muted-foreground'>
+                        {message.senderName}
+                      </span>
+                      <span className='text-[9px] text-muted-foreground/60'>
+                        {new Date(message.timestamp).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </div>
+                    <div
+                      className={cn(
+                        'max-w-[85%] rounded-2xl border px-3 py-2 text-xs',
+                        message.role === 'user'
+                          ? 'border-accent-primary/30 bg-[#62C073] text-white rounded-tr-none'
+                          : 'border-border-subtle bg-base text-foreground rounded-tl-none',
+                      )}
+                    >
+                      {message.content}
                     </div>
                   </div>
                 ))
@@ -185,7 +312,18 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
 
           {/* Input Area */}
           <div className='mt-4 shrink-0 border-t border-border-subtle/60 pt-3'>
-            <div className='flex items-end gap-2 rounded-2xl bg-base p-2'>
+            {isAiThinking && (
+              <div className='mb-2 flex items-center justify-between rounded-lg bg-base border border-accent-primary/20 px-3 py-1.5 text-xs'>
+                <div className='flex items-center gap-2'>
+                  <div className='h-1.5 w-1.5 rounded-full bg-[#62C073] animate-pulse' />
+                  <span className='text-muted-foreground font-medium'>
+                    {aiStatusData?.message ?? 'Generating design...'}
+                  </span>
+                </div>
+                <div className='h-3 w-3 border-2 border-accent-primary border-t-transparent rounded-full animate-spin' />
+              </div>
+            )}
+            <div className='flex items-end gap-2 rounded-2xl bg-base p-2 relative'>
               <Textarea
                 ref={textareaRef}
                 value={inputValue}
@@ -198,23 +336,30 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
                   'min-h-18 max-h-40 resize-none border-0 bg-transparent p-2 text-xs focus-visible:ring-0',
                   isAiThinking && 'opacity-50 cursor-not-allowed',
                 )}
-                disabled={isAiThinking}
+                disabled={isRunActive}
               />
 
               <Button
                 size='icon'
                 className={cn(
-                  'h-10 w-10 shrink-0 rounded-xl bg-accent-primary text-background hover:bg-accent-primary/90',
-                  isAiThinking && 'opacity-50 cursor-not-allowed',
+                  'h-10 w-10 shrink-0 rounded-xl bg-[#62C073] text-background hover:bg-[#62C073]/90',
+                  (isAiThinking || isSending) &&
+                    'opacity-50 cursor-not-allowed',
                 )}
-                disabled={!inputValue.trim() || isAiThinking}
+                disabled={isRunActive || isSending}
+                onClick={handleSendMessage}
               >
-                {isAiThinking ? (
+                {isRunActive || isSending ? (
                   <Loader2 className='h-4 w-4 animate-spin' />
                 ) : (
                   <Send className='h-4 w-4' />
                 )}
               </Button>
+              {sendError && (
+                <p className='absolute bottom-14 left-1/2 -translate-x-1/2 text-[10px] text-destructive font-medium'>
+                  {sendError}
+                </p>
+              )}
             </div>
           </div>
         </TabsContent>

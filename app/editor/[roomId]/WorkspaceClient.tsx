@@ -16,7 +16,6 @@ import { StarterTemplatesModal } from '@/components/editor/starter-templates-mod
 
 import { CanvasWrapper } from '@/components/canvas/CanvasWrapper';
 import { useProjectActions, type Project } from '@/hooks/useProjectActions';
-import { useCanvasAutosave } from '@/hooks/useCanvasAutosave';
 
 interface WorkspaceClientProps {
   projectName: string;
@@ -97,6 +96,7 @@ export function WorkspaceClient({
         {/* AI sidebar */}
         {isAiSidebarOpen && (
           <AISidebar
+            roomId={roomId}
             isOpen={isAiSidebarOpen}
             onClose={() => setIsAiSidebarOpen(false)}
           />
