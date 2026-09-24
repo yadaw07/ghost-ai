@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 
+import { LiveblocksProvider, RoomProvider } from '@liveblocks/react';
+import { ClientSideSuspense } from '@liveblocks/react/suspense';
+
 import { ProjectSidebar } from '@/components/editor/project-sidebar';
 import { ShareDialog } from '@/components/editor/share-dialog';
 import { ProjectDialogs } from '@/components/editor/ProjectDialogs';
@@ -53,84 +56,93 @@ export function WorkspaceClient({
 
 
   return (
-    <div className='flex h-screen flex-col overflow-hidden bg-background'>
-      {/* Top navbar */}
-      <EditorNavbar
-        isSidebarOpen={isSidebarOpen}
-        toggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
-        projectName={projectName}
-        onShare={() => setIsShareDialogOpen(true)}
-        onOpenTemplates={() => setIsTemplatesModalOpen(true)}
-        toggleAiSidebar={() => setIsAiSidebarOpen((prev) => !prev)}
-        saveStatus={saveStatus}
-      />
+    <LiveblocksProvider authEndpoint='/api/liveblocks-auth'>
+      <RoomProvider
+        id={roomId}
+        initialPresence={{ cursor: null, thinking: false }}
+      >
+        <ClientSideSuspense fallback={<div>Loading Workspace...</div>}>
+          <div className='flex h-screen flex-col overflow-hidden bg-background'>
+            {/* Top navbar */}
+            <EditorNavbar
+              isSidebarOpen={isSidebarOpen}
+              toggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
+              projectName={projectName}
+              onShare={() => setIsShareDialogOpen(true)}
+              onOpenTemplates={() => setIsTemplatesModalOpen(true)}
+              toggleAiSidebar={() => setIsAiSidebarOpen((prev) => !prev)}
+              saveStatus={saveStatus}
+            />
 
-      {/* Workspace */}
-      <div className='relative flex flex-1 gap-2 overflow-hidden bg-background p-2'>
-        {/* Left project sidebar */}
-        {isSidebarOpen && (
-          <div className='absolute inset-y-2 left-2 z-40 w-64'>
-            <ProjectSidebar
-              isOpen={true}
-              onClose={() => setIsSidebarOpen(false)}
-              projects={projects}
-              onCreate={actions.openCreate}
-              onRename={actions.openRename}
-              onDelete={actions.openDelete}
-              activeProjectId={activeProjectId}
+            {/* Workspace */}
+            <div className='relative flex flex-1 gap-2 overflow-hidden bg-background p-2'>
+              {/* Left project sidebar */}
+              {isSidebarOpen && (
+                <div className='absolute inset-y-2 left-2 z-40 w-64'>
+                  <ProjectSidebar
+                    isOpen={true}
+                    onClose={() => setIsSidebarOpen(false)}
+                    projects={projects}
+                    onCreate={actions.openCreate}
+                    onRename={actions.openRename}
+                    onDelete={actions.openDelete}
+                    activeProjectId={activeProjectId}
+                  />
+                </div>
+              )}
+
+              {/* Canvas */}
+              <main className='relative z-0 flex min-w-0 flex-1 items-center justify-center overflow-hidden rounded-2xl border border-subtle bg-base'>
+                <CanvasWrapper
+                  roomId={roomId}
+                  activeProjectId={activeProjectId}
+                  onSaveStatusChange={setSaveStatus}
+                  templateToImport={templateToImport}
+                  onTemplateImported={() => setTemplateToImport(null)}
+                />
+              </main>
+
+              {/* AI sidebar */}
+              {isAiSidebarOpen && (
+                <AISidebar
+                  roomId={roomId}
+                  isOpen={isAiSidebarOpen}
+                  onClose={() => setIsAiSidebarOpen(false)}
+                />
+              )}
+            </div>
+            <ShareDialog
+              open={isShareDialogOpen}
+              onOpenChange={setIsShareDialogOpen}
+              projectId={activeProjectId}
+              isOwner={isOwner}
+            />
+
+            <StarterTemplatesModal
+              open={isTemplatesModalOpen}
+              onOpenChange={setIsTemplatesModalOpen}
+              templates={CANVAS_TEMPLATES}
+              onImport={(template) => {
+                setTemplateToImport(template);
+                setIsTemplatesModalOpen(false);
+              }}
+            />
+
+            <ProjectDialogs
+              openDialog={actions.openDialog}
+              selectedProject={actions.selectedProject}
+              loading={actions.loading}
+              projectName={actions.projectName}
+              updateProjectName={actions.updateProjectName}
+              roomId={actions.roomId}
+              closeDialog={actions.closeDialog}
+              createProject={actions.createProject}
+              renameProject={actions.renameProject}
+              deleteProject={actions.deleteProject}
             />
           </div>
-        )}
-
-        {/* Canvas */}
-        <main className='relative z-0 flex min-w-0 flex-1 items-center justify-center overflow-hidden rounded-2xl border border-subtle bg-base'>
-          <CanvasWrapper
-            roomId={roomId}
-            activeProjectId={activeProjectId}
-            onSaveStatusChange={setSaveStatus}
-            templateToImport={templateToImport}
-            onTemplateImported={() => setTemplateToImport(null)}
-          />
-        </main>
-
-        {/* AI sidebar */}
-        {isAiSidebarOpen && (
-          <AISidebar
-            roomId={roomId}
-            isOpen={isAiSidebarOpen}
-            onClose={() => setIsAiSidebarOpen(false)}
-          />
-        )}
-      </div>
-      <ShareDialog
-        open={isShareDialogOpen}
-        onOpenChange={setIsShareDialogOpen}
-        projectId={activeProjectId}
-        isOwner={isOwner}
-      />
-
-      <StarterTemplatesModal
-        open={isTemplatesModalOpen}
-        onOpenChange={setIsTemplatesModalOpen}
-        templates={CANVAS_TEMPLATES}
-        onImport={(template) => {
-          setTemplateToImport(template);
-          setIsTemplatesModalOpen(false);
-        }}
-      />
-
-      <ProjectDialogs
-        openDialog={actions.openDialog}
-        selectedProject={actions.selectedProject}
-        loading={actions.loading}
-        projectName={actions.projectName}
-        updateProjectName={actions.updateProjectName}
-        roomId={actions.roomId}
-        closeDialog={actions.closeDialog}
-        createProject={actions.createProject}
-        renameProject={actions.renameProject}
-        deleteProject={actions.deleteProject}
-      />
-    </div>
+        </ClientSideSuspense>
+      </RoomProvider>
+    </LiveblocksProvider>
   );
 }

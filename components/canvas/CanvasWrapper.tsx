@@ -23,24 +23,17 @@ export function CanvasWrapper({
   onTemplateImported,
 }: CanvasWrapperProps) {
   return (
-    <LiveblocksProvider authEndpoint='/api/liveblocks-auth'>
-      <RoomProvider
-        id={roomId}
-        initialPresence={{ cursor: null, thinking: false }}
-      >
-        <ClientSideSuspense fallback={<CanvasLoading />}>
-          {/* ReactFlowProvider is required to use hooks like useReactFlow in child components */}
-          <ReactFlowProvider>
-            <CollaborativeCanvas
-              activeProjectId={activeProjectId}
-              onSaveStatusChange={onSaveStatusChange}
-              templateToImport={templateToImport}
-              onTemplateImported={onTemplateImported}
-            />
-          </ReactFlowProvider>
-        </ClientSideSuspense>
-      </RoomProvider>
-    </LiveblocksProvider>
+    <ClientSideSuspense fallback={<CanvasLoading />}>
+      {/* ReactFlowProvider is required to use hooks like useReactFlow in child components */}
+      <ReactFlowProvider>
+        <CollaborativeCanvas
+          activeProjectId={activeProjectId}
+          onSaveStatusChange={onSaveStatusChange}
+          templateToImport={templateToImport}
+          onTemplateImported={onTemplateImported}
+        />
+      </ReactFlowProvider>
+    </ClientSideSuspense>
   );
 }
 

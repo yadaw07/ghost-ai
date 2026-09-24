@@ -294,6 +294,13 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
                         })}
                       </span>
                     </div>
+
+                    {message.role === 'ai' && (
+                      <div className='mr-2 mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent-primary/10'>
+                        <Bot className='h-3.5 w-3.5 text-accent-primary' />
+                      </div>
+                    )}
+
                     <div
                       className={cn(
                         'max-w-[85%] rounded-2xl border px-3 py-2 text-xs',
