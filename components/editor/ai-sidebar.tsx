@@ -45,7 +45,7 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
   const { messages: aiStatusMessages } = useFeedMessages('ai-status-feed');
   const { messages: aiChatMessages } = useFeedMessages('ai-chat');
 
-  const { run, error: runError } = useRealtimeRun(runState?.runId ?? '', {
+  useRealtimeRun(runState?.runId ?? '', {
     accessToken: runState?.token ?? '',
     enabled: !!runState?.runId,
     onComplete: async () => {
@@ -122,7 +122,8 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
       });
 
       if (!chatResponse.ok) {
-        throw new Error('Failed to send chat message');
+        const errorData = await chatResponse.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to send chat message');
       }
 
       // 2. Start AI design run
@@ -132,6 +133,7 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
         body: JSON.stringify({
           prompt: text,
           roomId,
+          projectId: roomId,
         }),
       });
 
