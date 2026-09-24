@@ -55,6 +55,7 @@
 - Do not modify generated components/ui/\* files after shadcn installation.
 - Prisma models are organized using Prisma's multi-file schema structure under prisma/models/.
 - Clerk user IDs are stored directly as Project.ownerId; no local User model is introduced.
+- Liveblocks feed provisioning — Create the `ai-chat` and `ai-status-feed` feeds during authenticated room setup, with idempotent server-side guards for chat sends and design-agent status updates.
 
 ## Session Notes
 

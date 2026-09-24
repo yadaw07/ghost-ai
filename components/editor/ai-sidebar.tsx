@@ -22,6 +22,25 @@ interface AISidebarProps {
   onClose: () => void;
 }
 
+interface RealtimeRunWatcherProps {
+  runId: string;
+  accessToken: string;
+  onComplete: () => Promise<void>;
+}
+
+function RealtimeRunWatcher({
+  runId,
+  accessToken,
+  onComplete,
+}: RealtimeRunWatcherProps) {
+  useRealtimeRun(runId, {
+    accessToken,
+    onComplete,
+  });
+
+  return null;
+}
+
 const tabTrigger =
   'rounded-full px-3 text-[11px] font-medium text-muted-foreground transition-colors';
 
@@ -45,30 +64,6 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
   const { messages: aiStatusMessages } = useFeedMessages('ai-status-feed');
   const { messages: aiChatMessages } = useFeedMessages('ai-chat');
 
-  useRealtimeRun(runState?.runId ?? '', {
-    accessToken: runState?.token ?? '',
-    enabled: !!runState?.runId,
-    onComplete: async () => {
-      const response = await fetch('/api/ai-chat/send', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          roomId,
-          content: 'Architecture design complete.',
-          role: 'ai',
-        }),
-      });
-
-      if (!response.ok) {
-        console.error('Failed to send AI completion message');
-      }
-
-      setRunState(null);
-    },
-  });
-
   const aiStatus = aiStatusMessages?.[aiStatusMessages.length - 1];
   const aiStatusData = aiStatus?.data as AIStatusPayload | undefined;
 
@@ -76,10 +71,24 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
   const isAiThinking =
     aiStatusData?.status === 'started' || aiStatusData?.status === 'processing';
 
+  const aiChatFeed = useFeedMessages('ai-chat');
+
+  console.log('AI CHAT FEED:', aiChatFeed);
+  if (aiChatFeed.error) {
+    console.error('❌ AI CHAT FEED ERROR:', aiChatFeed.error);
+  }
+
   // Validate and filter chat messages
   const validatedChatMessages = React.useMemo(() => {
     return (aiChatMessages || [])
-      .map((m) => AIChatMessageSchema.safeParse(m.data))
+      .map((m) => {
+        const result = AIChatMessageSchema.safeParse(m.data);
+
+        console.log('CHAT MESSAGE:', m.data);
+        console.log('VALIDATION:', result);
+
+        return result;
+      })
       .filter((result) => result.success)
       .map((result) => result.data);
   }, [aiChatMessages]);
@@ -116,6 +125,7 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
         body: JSON.stringify({
           roomId,
           content: text,
+          role: 'user',
           senderId: user?.id,
           senderName: user?.fullName ?? user?.username ?? 'You',
         }),
@@ -125,6 +135,8 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
         const errorData = await chatResponse.json().catch(() => ({}));
         throw new Error(errorData.error || 'Failed to send chat message');
       }
+
+      setInputValue('');
 
       // 2. Start AI design run
       const response = await fetch('/api/ai/design', {
@@ -148,8 +160,6 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
         runId: data.runId,
         token: data.publicToken,
       });
-
-      setInputValue('');
     } catch (err) {
       setSendError('Failed to submit prompt. Please try again.');
       console.error('Failed to submit prompt.', err);
@@ -167,8 +177,11 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
               'I couldn’t start the architecture generation. Please try again.',
           }),
         });
-      } catch (chatError) {
+      } catch (chatError: any) {
         console.error('Failed to send error message to AI chat:', chatError);
+        setSendError(
+          'Failed to send error message to AI chat: ' + chatError.message,
+        );
       }
     } finally {
       setIsSending(false);
@@ -176,6 +189,34 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
   };
 
   if (!isOpen) return null;
+
+  {
+    runState && (
+      <RealtimeRunWatcher
+        runId={runState.runId}
+        accessToken={runState.token}
+        onComplete={async () => {
+          const response = await fetch('/api/ai-chat/send', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              roomId,
+              content: 'Architecture design complete.',
+              role: 'ai',
+            }),
+          });
+
+          if (!response.ok) {
+            console.error('Failed to send AI completion message');
+          }
+
+          setRunState(null);
+        }}
+      />
+    );
+  }
 
   return (
     <aside className='flex h-full min-h-0 w-75 shrink-0 flex-col overflow-hidden rounded-2xl border border-border-subtle bg-surface/95 shadow-xl'>
@@ -332,6 +373,7 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
                 <div className='h-3 w-3 border-2 border-accent-primary border-t-transparent rounded-full animate-spin' />
               </div>
             )}
+
             <div className='flex items-end gap-2 rounded-2xl bg-base p-2 relative'>
               <Textarea
                 ref={textareaRef}
@@ -364,12 +406,13 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
                   <Send className='h-4 w-4' />
                 )}
               </Button>
-              {sendError && (
-                <p className='absolute bottom-14 left-1/2 -translate-x-1/2 text-[10px] text-destructive font-medium'>
-                  {sendError}
-                </p>
-              )}
             </div>
+
+            {sendError && (
+              <p className='absolute bottom-14 left-1/2 -translate-x-1/2 text-[10px] text-destructive font-medium'>
+                {sendError}
+              </p>
+            )}
           </div>
         </TabsContent>
 

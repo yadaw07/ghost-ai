@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getLiveblocksClient } from '@/lib/liveblocks';
+import {
+  ensureLiveblocksFeed,
+  getLiveblocksClient,
+} from '@/lib/liveblocks';
 import { AIChatMessagePayload } from '@/types/tasks';
 
 const AI_USER_ID = 'ghost-ai';
 const AI_USER_NAME = 'Ghost AI';
+const feedId = 'ai-chat';
 
 export async function POST(req: NextRequest) {
   try {
@@ -56,14 +60,19 @@ export async function POST(req: NextRequest) {
 
     const lb = getLiveblocksClient();
 
-    // Ensure feed exists
-    await lb.createFeed({ roomId, feedId: 'ai-chat' });
+    await ensureLiveblocksFeed(roomId, feedId);
 
     // Append message
-    await lb.createFeedMessage({
+    const createdMessage = await lb.createFeedMessage({
+      roomId,
+      feedId,
+      data: message,
+    });
+
+    console.log('✅ LIVEBLOCKS MESSAGE CREATED:', {
       roomId,
       feedId: 'ai-chat',
-      data: message,
+      createdMessage,
     });
 
     return NextResponse.json({ success: true });

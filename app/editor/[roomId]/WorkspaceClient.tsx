@@ -52,8 +52,22 @@ export function WorkspaceClient({
   // we'll move the autosave hook inside CollaborativeCanvas.
   // However, the save status needs to be displayed in the Navbar.
   // We'll use a simple state and a callback.
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [saveStatus, setSaveStatus] = useState<
+    'idle' | 'saving' | 'saved' | 'error'
+  >('idle');
 
+  function Loader() {
+    return (
+      <div className='flex h-screen items-center justify-center bg-background'>
+        <div className='flex items-center gap-3'>
+          <div className='h-4 w-4 animate-spin rounded-full border-2 border-accent-primary/20 border-t-accent-primary' />
+          <span className='text-xs font-medium text-muted-foreground'>
+            Loading workspace...
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <LiveblocksProvider authEndpoint='/api/liveblocks-auth'>
@@ -61,7 +75,7 @@ export function WorkspaceClient({
         id={roomId}
         initialPresence={{ cursor: null, thinking: false }}
       >
-        <ClientSideSuspense fallback={<div>Loading Workspace...</div>}>
+        <ClientSideSuspense fallback={<Loader />}>
           <div className='flex h-screen flex-col overflow-hidden bg-background'>
             {/* Top navbar */}
             <EditorNavbar

@@ -73,7 +73,10 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json({ runId: run.id });
+    return NextResponse.json({
+      runId: run.id,
+      publicToken: run.publicAccessToken,
+    });
   } catch (error) {
     console.error('Error triggering design agent:', error);
     return new NextResponse('Internal Server Error', { status: 500 });

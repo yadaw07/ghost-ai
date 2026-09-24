@@ -1,5 +1,7 @@
 import { Liveblocks } from '@liveblocks/node';
 
+export const LIVEBLOCKS_FEED_IDS = ['ai-chat', 'ai-status-feed'] as const;
+
 export const CURSOR_COLORS = [
   '#E11D48',
   '#EA580C',
@@ -33,6 +35,28 @@ export function getLiveblocksClient(): Liveblocks {
   }
 
   return liveblocksGlobal.liveblocks;
+}
+
+function isConflictError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'status' in error &&
+    error.status === 409
+  );
+}
+
+export async function ensureLiveblocksFeed(
+  roomId: string,
+  feedId: string,
+): Promise<void> {
+  try {
+    await getLiveblocksClient().createFeed({ roomId, feedId });
+  } catch (error) {
+    if (!isConflictError(error)) {
+      throw error;
+    }
+  }
 }
 
 export function getCursorColor(userId: string): (typeof CURSOR_COLORS)[number] {

@@ -8,7 +8,10 @@ import { generateText, Output } from 'ai';
 import type { CanvasNode, TCanvasEdge } from '@/types/canvas';
 import { mutateFlow } from '@liveblocks/react-flow/node';
 
-import { getLiveblocksClient } from '@/lib/liveblocks';
+import {
+  ensureLiveblocksFeed,
+  getLiveblocksClient,
+} from '@/lib/liveblocks';
 import { NODE_COLORS } from '@/types/canvas';
 
 const AI_USER_ID = 'ghost-ai';
@@ -46,6 +49,8 @@ const DesignSchema = z.object({
     z.object({
       id: z.string(),
       position,
+      width: z.number().min(140).max(240),
+      height: z.number().min(60).max(120),
       data: z.object({ label: z.string(), color, shape }),
     }),
   ),
@@ -131,11 +136,7 @@ export const designAgent = task({
 
     try {
       // 1. Start: create the feed if needed, show status + presence
-      try {
-        await lb.createFeed({ roomId, feedId: STATUS_FEED_ID });
-      } catch {
-        // feed already exists
-      }
+      await ensureLiveblocksFeed(roomId, STATUS_FEED_ID);
       await postStatus('started', 'Architect is thinking...');
       await setPresence(true, null, 120);
 
@@ -151,20 +152,39 @@ export const designAgent = task({
       const { output } = await generateText({
         model: google('gemini-3.6-flash'),
         output: Output.object({ schema: DesignSchema }),
-        instructions: `You are a world-class System Design Architect.
-        Your goal is to map a user's system description onto a collaborative canvas.
+        instructions: `You are a system design architect. Convert the user's request into a clean React Flow architecture.
 
-        Constraints:
-        - Use only the following node shapes: rectangle, circle, diamond, pill, cylinder, hexagon.
-        - Use only these color keys: ${Object.keys(NODE_COLORS).join(', ')}.
-        - Provide a clean, logical layout. Avoid overlapping nodes.
-        - Coordinates should be centered around (0,0) and spaced realistically (e.g., 200-400px apart).
-        - Ensure every edge source and target corresponds to a node ID (new or existing).
-        - Reuse the IDs of existing nodes when changing them, and never re-add existing nodes.
-        - Place new nodes in free space, not on top of existing ones.
-        - Only update or delete existing things if the user asks for it.
-        - Use empty arrays for anything you don't need to change.`,
-        prompt: `Current canvas:\n${JSON.stringify(canvas)}\n\nUser request:\n${prompt}`,
+        SIZING:
+        - Every new node must include width and height.
+        - Default: 180x80px.
+        - Width: 160-240px, height: 70-100px.
+        - Never exceed 260x120px.
+        - Keep sizes consistent and fit labels comfortably.
+
+        LAYOUT:
+        - Keep the diagram compact and readable.
+        - Prefer left-to-right or top-to-bottom flow.
+        - Never overlap nodes.
+        - Keep 80-140px between node boundaries.
+        - Keep connected nodes about 200-350px apart.
+        - Account for node dimensions when positioning.
+        - Avoid large gaps and unnecessary edge crossings.
+        - Center the layout around (0,0).
+
+        RULES:
+        - Shapes: rectangle, circle, diamond, pill, cylinder, hexagon.
+        - Colors: ${Object.keys(NODE_COLORS).join(', ')}.
+        - Every edge must reference a valid node ID.
+        - Reuse existing IDs; never recreate existing nodes.
+        - Don't modify or delete existing nodes/edges unless requested.
+        - Place new nodes in free space.
+        - Use empty arrays when no changes are needed.`,
+
+        prompt: `Current canvas:
+          ${JSON.stringify(canvas)}
+
+          User request:
+          ${prompt}`,
       });
 
       if (!output) throw new Error('AI failed to generate a design');
@@ -230,6 +250,8 @@ export const designAgent = task({
               id: node.id,
               type: 'shape',
               position: node.position,
+              width: node.width,
+              height: node.height,
               data: node.data,
             });
 

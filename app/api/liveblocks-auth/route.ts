@@ -1,6 +1,11 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 
-import { getCursorColor, getLiveblocksClient } from '@/lib/liveblocks';
+import {
+  ensureLiveblocksFeed,
+  getCursorColor,
+  getLiveblocksClient,
+  LIVEBLOCKS_FEED_IDS,
+} from '@/lib/liveblocks';
 import { checkProjectAccess } from '@/lib/project-access';
 
 interface LiveblocksAuthRequest {
@@ -73,6 +78,12 @@ export async function POST(request: Request) {
       },
     },
   });
+
+  await Promise.all(
+    LIVEBLOCKS_FEED_IDS.map((feedId) =>
+      ensureLiveblocksFeed(payload.room as string, feedId),
+    ),
+  );
 
   const { status, body } = await liveblocks.identifyUser(
     { userId, groupIds: [] },
