@@ -207,6 +207,8 @@ export const designAgent = task({
               continue;
             }
 
+            await moveCursor(update.position ?? node.position);
+
             flow.updateNode(update.id, {
               ...(update.position && {
                 position: update.position,
@@ -217,11 +219,13 @@ export const designAgent = task({
               flow.updateNodeData(update.id, defined(update.data));
             }
 
-            await moveCursor(update.position);
+            await wait.for({ seconds: 0.2 });
           }
 
           // Add new nodes
           for (const node of output.nodes) {
+            await moveCursor(node.position);
+
             flow.addNode({
               id: node.id,
               type: 'shape',
@@ -229,18 +233,28 @@ export const designAgent = task({
               data: node.data,
             });
 
-            await moveCursor(node.position);
+            await wait.for({ seconds: 0.2 });
           }
 
           // Add new edges
           for (const edge of output.edges) {
-            if (!flow.getNode(edge.source) || !flow.getNode(edge.target)) {
+            const sourceNode = flow.getNode(edge.source);
+            const targetNode = flow.getNode(edge.target);
+
+            if (!sourceNode || !targetNode) {
               logger.warn('Skipping edge with missing node', {
                 edge,
               });
 
               continue;
             }
+
+            const edgeCursor = {
+              x: (sourceNode.position.x + targetNode.position.x) / 2,
+              y: (sourceNode.position.y + targetNode.position.y) / 2,
+            };
+
+            await moveCursor(edgeCursor);
 
             flow.addEdge({
               id: edge.id,
@@ -250,7 +264,7 @@ export const designAgent = task({
               data: edge.data,
             });
 
-            await moveCursor();
+            await wait.for({ seconds: 0.2 });
           }
         },
       );
