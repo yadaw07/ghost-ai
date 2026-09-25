@@ -5,7 +5,11 @@ import { useUser } from '@clerk/nextjs';
 import React, { useState, useRef, useEffect } from 'react';
 import { Bot, X, Send, FileText, Download, Loader2 } from 'lucide-react';
 
-import { useFeedMessages } from '@liveblocks/react';
+import {
+  useFeedMessages,
+  useCreateFeed,
+  useCreateFeedMessage,
+} from '@liveblocks/react';
 import { useRealtimeRun } from '@trigger.dev/react-hooks';
 
 import { cn } from '@/lib/utils';
@@ -28,15 +32,41 @@ interface RealtimeRunWatcherProps {
   onComplete: () => Promise<void>;
 }
 
+const TERMINAL_STATUSES = [
+  'COMPLETED',
+  'FAILED',
+  'CANCELED',
+  'CRASHED',
+  'TIMED_OUT',
+  'INTERRUPTED',
+  'SYSTEM_ERROR',
+  'INVALID_PAYLOAD',
+  'EXPIRED',
+  'ABORTED',
+] as const;
+
 function RealtimeRunWatcher({
   runId,
   accessToken,
   onComplete,
 }: RealtimeRunWatcherProps) {
-  useRealtimeRun(runId, {
+  const { run } = useRealtimeRun(runId, {
     accessToken,
-    onComplete,
   });
+
+  const handledRef = useRef(false);
+
+  useEffect(() => {
+    if (!run || handledRef.current) return;
+
+    if (!(TERMINAL_STATUSES as readonly string[]).includes(run.status)) {
+      return;
+    }
+
+    handledRef.current = true;
+
+    onComplete();
+  }, [run?.status, onComplete]);
 
   return null;
 }
@@ -61,6 +91,9 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const createFeed = useCreateFeed();
+  const createFeedMessage = useCreateFeedMessage();
+
   const { messages: aiStatusMessages } = useFeedMessages('ai-status-feed');
   const { messages: aiChatMessages } = useFeedMessages('ai-chat');
 
@@ -71,12 +104,10 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
   const isAiThinking =
     aiStatusData?.status === 'started' || aiStatusData?.status === 'processing';
 
-  const aiChatFeed = useFeedMessages('ai-chat');
-
-  console.log('AI CHAT FEED:', aiChatFeed);
-  if (aiChatFeed.error) {
-    console.error('❌ AI CHAT FEED ERROR:', aiChatFeed.error);
-  }
+  useEffect(() => {
+    createFeed('ai-status-feed').catch(() => {});
+    createFeed('ai-chat').catch(() => {});
+  }, [createFeed]);
 
   // Validate and filter chat messages
   const validatedChatMessages = React.useMemo(() => {
@@ -110,38 +141,38 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
 
   const handleSendMessage = async () => {
     const text = inputValue.trim();
-    if (!text || isSending) return;
+
+    if (!text || isSending || isRunActive) return;
 
     setIsSending(true);
     setSendError(null);
 
     try {
-      // 1. Push user's message to collaborative chat
-      const chatResponse = await fetch('/api/ai-chat/send', {
+      // 1. Add user's message directly to Liveblocks
+      await createFeedMessage('ai-chat', {
+        type: 'ai-chat',
+        senderId: user?.id ?? 'unknown',
+        senderName: user?.fullName ?? user?.username ?? 'You',
+        role: 'user',
+        content: text,
+        timestamp: Date.now(),
+      });
+
+      setInputValue('');
+
+      // 2. Add initial AI status
+      await createFeedMessage('ai-status-feed', {
+        type: 'ai-status',
+        status: 'started',
+        message: 'Ghost AI is analyzing your request…',
+      });
+
+      // 3. Start the AI design run
+      const response = await fetch('/api/ai/design', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          roomId,
-          content: text,
-          role: 'user',
-          senderId: user?.id,
-          senderName: user?.fullName ?? user?.username ?? 'You',
-        }),
-      });
-
-      if (!chatResponse.ok) {
-        const errorData = await chatResponse.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to send chat message');
-      }
-
-      setInputValue('');
-
-      // 2. Start AI design run
-      const response = await fetch('/api/ai/design', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt: text,
           roomId,
@@ -153,35 +184,57 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
         throw new Error('Failed to submit design prompt');
       }
 
-      const data = await response.json();
+      const { runId } = await response.json();
 
-      // 3. Track Trigger.dev run
-      setRunState({
-        runId: data.runId,
-        token: data.publicToken,
+      // 4. Get public token for Trigger realtime updates
+      const tokenResponse = await fetch('/api/ai/design/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ runId }),
       });
-    } catch (err) {
-      setSendError('Failed to submit prompt. Please try again.');
-      console.error('Failed to submit prompt.', err);
 
+      if (!tokenResponse.ok) {
+        throw new Error('Failed to get realtime run token');
+      }
+
+      const { token } = await tokenResponse.json();
+
+      // 5. Start watching the Trigger run
+      setRunState({
+        runId,
+        token,
+      });
+    } catch (error) {
+      console.error('Failed to submit prompt:', error);
+
+      setSendError(
+        error instanceof Error
+          ? error.message
+          : 'Failed to submit prompt. Please try again.',
+      );
+
+      // Show failure in chat
       try {
-        await fetch('/api/ai-chat/send', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            roomId,
-            role: 'ai',
-            content:
-              'I couldn’t start the architecture generation. Please try again.',
-          }),
+        await createFeedMessage('ai-chat', {
+          type: 'ai-chat',
+          senderId: 'ghost-ai',
+          senderName: 'Ghost AI',
+          role: 'ai',
+          content:
+            'I couldn’t start the architecture generation. Please try again.',
+          timestamp: Date.now(),
         });
-      } catch (chatError: any) {
-        console.error('Failed to send error message to AI chat:', chatError);
-        setSendError(
-          'Failed to send error message to AI chat: ' + chatError.message,
-        );
+
+        // Error status
+        await createFeedMessage('ai-status-feed', {
+          type: 'ai-status',
+          status: 'error',
+          message: 'Ghost AI encountered an error.',
+        });
+      } catch (chatError) {
+        console.error('Failed to create AI error message:', chatError);
       }
     } finally {
       setIsSending(false);
@@ -196,23 +249,26 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
         runId={runState.runId}
         accessToken={runState.token}
         onComplete={async () => {
-          const response = await fetch('/api/ai-chat/send', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              roomId,
-              content: 'Architecture design complete.',
+          try {
+            await createFeedMessage('ai-chat', {
+              type: 'ai-chat',
+              senderId: 'ghost-ai',
+              senderName: 'Ghost AI',
               role: 'ai',
-            }),
-          });
+              content: 'Architecture design complete.',
+              timestamp: Date.now(),
+            });
 
-          if (!response.ok) {
-            console.error('Failed to send AI completion message');
+            await createFeedMessage('ai-status-feed', {
+              type: 'ai-status',
+              status: 'completed',
+              message: 'Architecture design complete.',
+            });
+          } catch (error) {
+            console.error('Failed to create AI completion message:', error);
+          } finally {
+            setRunState(null);
           }
-
-          setRunState(null);
         }}
       />
     );
