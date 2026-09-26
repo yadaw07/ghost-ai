@@ -22,6 +22,7 @@ async function getProjectForMember(projectId: string, userId: string) {
     where: { id: projectId },
     include: { collaborators: { orderBy: { createdAt: 'asc' } } },
   });
+
   if (!project) return null;
 
   if (project.ownerId === userId) return project;
@@ -73,9 +74,7 @@ async function enrichCollaborators(
 async function enrichOwner(ownerId: string): Promise<ProjectOwnerResponse> {
   const client = await clerkClient();
   const user = await client.users.getUser(ownerId);
-  const displayName = [user.firstName, user.lastName]
-    .filter(Boolean)
-    .join(' ');
+  const displayName = [user.firstName, user.lastName].filter(Boolean).join(' ');
 
   return {
     id: user.id,

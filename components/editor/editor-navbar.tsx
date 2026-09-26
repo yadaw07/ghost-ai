@@ -8,6 +8,10 @@ import {
   Bot,
   Share2,
   Workflow,
+  Check,
+  Loader2,
+  AlertCircle,
+  Save,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -25,6 +29,8 @@ interface EditorNavbarProps {
   onOpenTemplates: () => void;
   /** Toggles the AI sidebar */
   toggleAiSidebar: () => void;
+  /** Current save status of the canvas */
+  saveStatus?: 'idle' | 'saving' | 'saved' | 'error';
 }
 
 /** Top navigation bar for the editor view */
@@ -35,6 +41,7 @@ export function EditorNavbar({
   onShare,
   onOpenTemplates,
   toggleAiSidebar,
+  saveStatus,
 }: EditorNavbarProps) {
   return (
     <header className='z-50 flex h-12 shrink-0 items-center justify-between border-b border-subtle bg-base px-4'>
@@ -53,19 +60,65 @@ export function EditorNavbar({
           )}
         </button>
 
-        <div className='min-w-0'>
+        <div className='min-w-0 relative group'>
           <h1 className='truncate text-sm font-medium text-foreground'>
             {projectName}
           </h1>
 
-          <p className='text-[10px] leading-none text-muted-foreground'>
-            Workspace
-          </p>
+          <div className='flex items-center gap-1.5'>
+            <p className='text-[10px] leading-none text-muted-foreground'>
+              Workspace
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Right side */}
-      <div className='flex items-center gap-2'>
+      <div className='flex items-center gap-1.5'>
+        {saveStatus === 'idle' || !saveStatus ? (
+          <Button
+            variant='ghost'
+            size='sm'
+            className='hidden sm:flex'
+            onClick={() => {}}
+          >
+            <Save className='mr-1.5 h-3.5 w-3.5' />
+            Save
+          </Button>
+        ) : (
+          <div
+            className='flex h-8 items-center gap-1.5 rounded-md border border-border-subtle bg-subtle px-2.5'
+            aria-live='polite'
+          >
+            {saveStatus === 'saving' && (
+              <>
+                <Loader2 className='h-3.5 w-3.5 animate-spin text-muted-foreground' />
+                <span className='hidden text-[11px] text-muted-foreground sm:inline'>
+                  Saving...
+                </span>
+              </>
+            )}
+
+            {saveStatus === 'saved' && (
+              <>
+                <Check className='h-3.5 w-3.5 text-success' />
+                <span className='hidden text-[11px] text-success sm:inline'>
+                  Saved
+                </span>
+              </>
+            )}
+
+            {saveStatus === 'error' && (
+              <>
+                <AlertCircle className='h-3.5 w-3.5 text-error' />
+                <span className='hidden text-[11px] text-error sm:inline'>
+                  Save failed
+                </span>
+              </>
+            )}
+          </div>
+        )}
+
         <Button
           variant='ghost'
           size='sm'

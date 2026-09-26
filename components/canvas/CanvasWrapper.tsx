@@ -9,32 +9,31 @@ import type { CanvasTemplate } from '@/components/editor/starter-templates';
 
 interface CanvasWrapperProps {
   roomId: string;
+  activeProjectId: string;
+  onSaveStatusChange: (status: 'idle' | 'saving' | 'saved' | 'error') => void;
   templateToImport: CanvasTemplate | null;
   onTemplateImported: () => void;
 }
 
 export function CanvasWrapper({
   roomId,
+  activeProjectId,
+  onSaveStatusChange,
   templateToImport,
   onTemplateImported,
 }: CanvasWrapperProps) {
   return (
-    <LiveblocksProvider authEndpoint='/api/liveblocks-auth'>
-      <RoomProvider
-        id={roomId}
-        initialPresence={{ cursor: null, isThinking: false }}
-      >
-        <ClientSideSuspense fallback={<CanvasLoading />}>
-          {/* ReactFlowProvider is required to use hooks like useReactFlow in child components */}
-          <ReactFlowProvider>
-            <CollaborativeCanvas
-              templateToImport={templateToImport}
-              onTemplateImported={onTemplateImported}
-            />
-          </ReactFlowProvider>
-        </ClientSideSuspense>
-      </RoomProvider>
-    </LiveblocksProvider>
+    <ClientSideSuspense fallback={<CanvasLoading />}>
+      {/* ReactFlowProvider is required to use hooks like useReactFlow in child components */}
+      <ReactFlowProvider>
+        <CollaborativeCanvas
+          activeProjectId={activeProjectId}
+          onSaveStatusChange={onSaveStatusChange}
+          templateToImport={templateToImport}
+          onTemplateImported={onTemplateImported}
+        />
+      </ReactFlowProvider>
+    </ClientSideSuspense>
   );
 }
 

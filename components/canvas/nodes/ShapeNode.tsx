@@ -91,17 +91,19 @@ export function ShapeNode({
     const { bg, text } = NODE_COLORS[colorKey] || NODE_COLORS.neutral;
 
     const content = isEditing ? (
-      <Textarea
-        className='nodrag nowheel w-full resize-none border-none bg-transparent p-0 text-center text-xs font-medium leading-tight text-foreground outline-none focus-visible:ring-0'
-        value={editValue}
-        onChange={(e) => setEditValue(e.target.value)}
-        onBlur={handleBlur}
-        onKeyDown={handleKeyDown}
-        autoFocus
-      />
+      <div className='flex h-full w-full items-center justify-center'>
+        <Textarea
+          className='nodrag nowheel w-full resize-none border-none bg-transparent p-0 text-center text-xs font-medium leading-tight text-foreground outline-none focus-visible:ring-0'
+          value={editValue}
+          onChange={(e) => setEditValue(e.target.value)}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          autoFocus
+        />
+      </div>
     ) : (
       <span
-        className='w-full px-2 text-center text-xs font-medium cursor-text'
+        className='w-full cursor-text px-2 text-center text-xs font-medium'
         style={{ color: text }}
         onDoubleClick={handleDoubleClick}
       >
@@ -137,29 +139,29 @@ export function ShapeNode({
     const fill = bg;
 
     const content = (
-    <div
-      className='flex h-full w-full items-center justify-center text-center'
-      style={{ color: text }}
-    >
-      {isEditing ? (
-        <Textarea
-          className='nodrag nowheel w-full resize-none border-none bg-transparent p-0 text-center text-xs font-medium leading-tight text-foreground outline-none focus-visible:ring-0'
-          value={editValue}
-          onChange={(e) => setEditValue(e.target.value)}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          autoFocus
-        />
-      ) : (
-        <span
-          className='text-xs font-medium cursor-text'
-          onDoubleClick={handleDoubleClick}
-        >
-          {label || shape}
-        </span>
-      )}
-    </div>
-  );
+      <div
+        className='flex h-full w-full items-center justify-center text-center'
+        style={{ color: text }}
+      >
+        {isEditing ? (
+          <Textarea
+            className='nodrag nowheel w-full resize-none border-none bg-transparent p-0 text-center text-xs font-medium leading-tight text-foreground outline-none focus-visible:ring-0'
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            autoFocus
+          />
+        ) : (
+          <span
+            className='text-xs font-medium cursor-text'
+            onDoubleClick={handleDoubleClick}
+          >
+            {label || shape}
+          </span>
+        )}
+      </div>
+    );
 
     switch (shape) {
       case 'diamond':

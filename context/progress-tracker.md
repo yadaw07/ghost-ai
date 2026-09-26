@@ -1,10 +1,10 @@
 ## Current Phase
 
-- Feature 18: Starter Template Library — Implementing predefined architecture templates with collaborative canvas replacement import. (completed)
+- Feature 27 (TBD).
 
 ## Current Goal
 
-- Implement starter templates as specified in feature-spec 18 (completed).
+- (To be defined based on the next feature).
 
 ## Completed
 
@@ -27,10 +27,22 @@
 - Feature 16: Replace the default canvas edges with custom edges that feel easier to follow, easier to click, and support inline labels.
 - Feature 17: Canvas Ergonomics — Added floating control bar for zoom and undo/redo, implemented keyboard shortcuts for zoom and history, and removed the minimap.
 - Feature 18: Starter Template Library — Added three predefined templates, lightweight SVG previews, navbar import entry point, and collaborative replacement imports with automatic fit view.
+- Feature 19: Presence Avatars and Live Cursors — Added a canvas-only presence stack, collaborator avatar overflow handling, current-user filtering, and live cursor broadcasting with Liveblocks presence updates while keeping the shared editor/navbar unchanged.
+- Feature 20: AI Sidebar Shell — Implement the floating AI chat sidebar with a tabbed layout for the AI Architect and Specs, including empty states, starter chips, and a demo spec card.
+- Feature 21: Canvas Autosave — Implement canvas state persistence using Vercel Blob and Prisma, including autosave hooks and status indicators.
+- Feature 22: Design Agent API — implemented backend flow for design generation using Trigger.dev, including task triggering, run tracking via Prisma TaskRun model, and run-scoped token issuance.
+- Feature 23: Design Agent Logic — Implement full AI design agent logic in `trigger/design-agent.ts` using Gemini to generate architecture and update the collaborative canvas via Liveblocks.
+- Feature 24: AI Presence State — Add shared AI activity indicators so everyone in the room can see when generation is in progress. This unit is only for UI, presence, and realtime status signals.
+- Feature 25: Sidebar Chat Feed — Implement real-time room chat in the AI sidebar using a dedicated Liveblocks `ai-chat` feed.
+- Feature 26: Design Agent Frontend — Wired up AI sidebar to submit design prompts, track real-time run status via `@trigger.dev/react-hooks`, and display status updates in a compact UI strip.
+
+## In Progress
+
+- None .
 
 ## Next Up
 
-- Feature-19 (TBD).
+- Feature 27 (TBD).
 
 ## Open Questions
 
@@ -43,6 +55,7 @@
 - Do not modify generated components/ui/\* files after shadcn installation.
 - Prisma models are organized using Prisma's multi-file schema structure under prisma/models/.
 - Clerk user IDs are stored directly as Project.ownerId; no local User model is introduced.
+- Liveblocks feed provisioning — Create the `ai-chat` and `ai-status-feed` feeds during authenticated room setup, with idempotent server-side guards for chat sends and design-agent status updates.
 
 ## Session Notes
 
@@ -53,3 +66,4 @@
 - Feature 05 added the Prisma project data layer with Project and ProjectCollaborator models, Prisma client singleton, and initial migration.
 - Feature 09 follow-up: Share dialog now shows the Clerk-enriched project owner before collaborators with an Owner badge.
 - Feature 17 follow-up: Project sidebar now overlays the canvas, with canvas controls rendered beneath it.
+- Feature 19 follow-up: Liveblocks presence is now aligned with the spec using a `thinking` field and canvas-only presence UI that excludes the current Clerk user.
