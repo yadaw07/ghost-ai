@@ -34,6 +34,10 @@ export function Editor({
       <EditorNavbar
         isSidebarOpen={isSidebarOpen}
         toggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
+        projectName='New Project'
+        onShare={() => {}}
+        onOpenTemplates={() => {}}
+        toggleAiSidebar={() => {}}
       />
 
       {/* Workspace area */}
