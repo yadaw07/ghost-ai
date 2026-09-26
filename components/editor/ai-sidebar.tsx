@@ -10,7 +10,7 @@ import { useFeedMessages } from '@liveblocks/react/suspense';
 import { useRealtimeRun } from '@trigger.dev/react-hooks';
 
 import { cn } from '@/lib/utils';
-import { AIStatusPayload, AIChatMessageSchema } from '@/types/tasks';
+import { AIStatusPayload } from '@/types/tasks';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -257,16 +257,18 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
 
       setIsSending(false);
     }
+  };
 
-    if (!isOpen) return null;
+  if (!isOpen) return null;
 
-    const activeRun = runState as { runId: string; token: string } | null;
+  const activeRun = runState;
 
-    {
-      (activeRun as { runId: string; token: string }) && (
+  return (
+    <>
+      {activeRun && (
         <RealtimeRunWatcher
-          runId={(activeRun as { runId: string; token: string }).runId}
-          accessToken={(activeRun as { runId: string; token: string }).token}
+          runId={activeRun.runId}
+          accessToken={activeRun.token}
           onStatusChange={(status, _output) => {
             const isSuccess = status === 'COMPLETED';
 
@@ -310,10 +312,7 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
             setRunState(null);
           }}
         />
-      );
-    }
-
-    return (
+      )}
       <aside className='flex h-full min-h-0 w-75 shrink-0 flex-col overflow-hidden rounded-2xl border border-border-subtle bg-surface/95 shadow-xl'>
         {/* Header */}
         <header className='flex h-16 shrink-0 items-center justify-between border-b border-border-subtle px-4'>
@@ -552,6 +551,6 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
           </TabsContent>
         </Tabs>
       </aside>
-    );
-  };
+    </>
+  );
 }
