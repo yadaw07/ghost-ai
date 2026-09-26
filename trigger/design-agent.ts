@@ -15,7 +15,7 @@ import {
 import { NODE_COLORS } from '@/types/canvas';
 
 const AI_USER_ID = 'ghost-ai';
-const STATUS_FEED_ID = 'ai-status-feed'; // must match the feed your client reads
+const STATUS_FEED_ID = 'ai-status'; // must match the feed your client reads
 
 // @ai-sdk/google reads GOOGLE_GENERATIVE_AI_API_KEY by default, so pass ours.
 const google = createGoogleGenerativeAI({
