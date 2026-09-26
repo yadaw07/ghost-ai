@@ -328,14 +328,7 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
                 <p className='text-[10px] text-muted-foreground'>
                   Collaborate with Ghost AI
                 </p>
-                {isAiThinking && (
-                  <div className='flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-accent-primary/10 text-accent-primary border border-accent-primary/20'>
-                    <Loader2 className='h-2 w-2 animate-spin' />
-                    <span className='text-[9px] font-medium leading-none'>
-                      {aiStatus?.message ?? 'Thinking...'}
-                    </span>
-                  </div>
-                )}
+                
               </div>
             </div>
           </div>

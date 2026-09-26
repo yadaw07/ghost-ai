@@ -1,6 +1,6 @@
 import { put, get } from '@vercel/blob';
 
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 import { prisma } from '@/lib/prisma';
@@ -17,11 +17,14 @@ export async function PUT(
 
     const { projectId } = await params;
 
+    const user = await currentUser();
+    const email = user?.primaryEmailAddress?.emailAddress;
+
     // Verify project membership/ownership
     const project = await prisma.project.findFirst({
       where: {
         id: projectId,
-        OR: [{ ownerId: userId }, { collaborators: { some: { id: userId } } }],
+        OR: [{ ownerId: userId }, { collaborators: { some: { email } } }],
       },
     });
 
