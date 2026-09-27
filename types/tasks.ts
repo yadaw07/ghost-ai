@@ -1,12 +1,14 @@
 import { z } from 'zod';
 
-export interface AIStatusPayload {
+export interface AIStatus {
+  [key: string]: string | number;
+
   type: 'ai-status';
   status: 'started' | 'processing' | 'completed' | 'error';
   message: string;
 }
 
-export interface AIChatMessagePayload {
+export interface AIChatMessage {
   [key: string]: string | number;
 
   type: 'ai-chat';

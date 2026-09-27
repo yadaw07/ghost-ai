@@ -8,10 +8,7 @@ import { generateText, Output } from 'ai';
 import type { CanvasNode, TCanvasEdge } from '@/types/canvas';
 import { mutateFlow } from '@liveblocks/react-flow/node';
 
-import {
-  ensureLiveblocksFeed,
-  getLiveblocksClient,
-} from '@/lib/liveblocks';
+import { ensureLiveblocksFeed, getLiveblocksClient } from '@/lib/liveblocks';
 import { NODE_COLORS } from '@/types/canvas';
 
 const AI_USER_ID = 'ghost-ai';
@@ -294,6 +291,21 @@ export const designAgent = task({
       // 4. Finalization
       await postStatus('completed', 'Architecture design complete!');
 
+      await ensureLiveblocksFeed(roomId, 'ai-chat');
+
+      await lb.createFeedMessage({
+        roomId,
+        feedId: 'ai-chat',
+        data: {
+          type: 'ai-chat',
+          senderId: 'ghost-ai',
+          senderName: 'Ghost AI',
+          role: 'ai',
+          content: 'Architecture design complete.',
+          timestamp: Date.now(),
+        },
+      });
+
       logger.log('Design Agent successfully completed the architecture');
 
       return {
@@ -307,6 +319,19 @@ export const designAgent = task({
         'error',
         'Something went wrong with the design process.',
       );
+
+      await lb.createFeedMessage({
+        roomId,
+        feedId: 'ai-chat',
+        data: {
+          type: 'ai-chat',
+          senderId: 'ghost-ai',
+          senderName: 'Ghost AI',
+          role: 'ai',
+          content: 'Something went wrong with the design process.',
+          timestamp: Date.now(),
+        },
+      });
       throw error;
     } finally {
       // Clear AI presence. There is no "remove" call, so a 2s TTL (the minimum) does it.

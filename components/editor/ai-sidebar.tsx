@@ -5,17 +5,20 @@ import { useUser } from '@clerk/nextjs';
 import React, { useState, useRef, useEffect } from 'react';
 import { Bot, X, Send, FileText, Download, Loader2 } from 'lucide-react';
 
-import { useFeedMessages } from '@liveblocks/react/suspense';
-
+import {
+  useFeedMessages,
+  useCreateFeedMessage,
+} from '@liveblocks/react/suspense';
 import { useRealtimeRun } from '@trigger.dev/react-hooks';
 
 import { cn } from '@/lib/utils';
-import { AIStatusPayload } from '@/types/tasks';
+import { AIStatus, AIChatMessage } from '@/types/tasks';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { getLiveblocksClient } from '@/lib/liveblocks';
 
 interface AISidebarProps {
   roomId: string;
@@ -42,6 +45,12 @@ const TERMINAL_STATUSES = [
   'ABORTED',
 ] as const;
 
+const tabTrigger =
+  'rounded-full px-3 text-[11px] font-medium text-muted-foreground transition-colors';
+
+const tabTriggerActive =
+  'bg-accent-ai-text! text-white! border-transparent! shadow-sm';
+
 function RealtimeRunWatcher({
   runId,
   accessToken,
@@ -54,35 +63,20 @@ function RealtimeRunWatcher({
   const handledRef = useRef(false);
 
   useEffect(() => {
-    if (!run) return;
+    if (!run || handledRef.current) return;
 
-    if (handledRef.current) return;
+    const isTerminal = (TERMINAL_STATUSES as readonly string[]).includes(
+      run.status,
+    );
 
-    if (!(TERMINAL_STATUSES as readonly string[]).includes(run.status)) {
-      return;
-    }
+    if (!isTerminal) return;
 
     handledRef.current = true;
 
     onStatusChange(run.status, run.output);
-  }, [run?.status, run?.output, onStatusChange]);
+  }, [run, onStatusChange]);
 
   return null;
-}
-
-const tabTrigger =
-  'rounded-full px-3 text-[11px] font-medium text-muted-foreground transition-colors';
-
-const tabTriggerActive =
-  'bg-accent-ai-text! text-white! border-transparent! shadow-sm';
-
-interface AIChatMessage {
-  type: 'ai-chat';
-  senderId: string;
-  senderName: string;
-  role: 'user' | 'ai';
-  content: string;
-  timestamp: number;
 }
 
 export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
@@ -98,48 +92,47 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
   } | null>(null);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const liveblocks = getLiveblocksClient();
 
-  const [chatMessages, setChatMessages] = useState<AIChatMessage[]>([]);
-  const [aiStatus, setAiStatus] = useState<AIStatusPayload | null>(null);
+  const { messages: rawChatMessages } = useFeedMessages('ai-chat');
+  const { messages: rawStatusMessages } = useFeedMessages('ai-status');
 
-  const aiStatusFeed = useFeedMessages('ai-status');
-  console.log('AI STATUS FEED ', aiStatusFeed);
+  const AI_CHAT = useFeedMessages('ai-chat');
+  const AI_STATUS = useFeedMessages('ai-status');
 
-  // Sync Liveblocks feed messages to AI status and chat
-  useEffect(() => {
-    if (!aiStatusFeed || aiStatusFeed.messages.length === 0) return;
+  console.log({ AI_CHAT });
+  console.log({ AI_STATUS });
 
-    const latestMessage = aiStatusFeed.messages[aiStatusFeed.messages.length - 1];
-    const data = latestMessage.data as {
-      type: 'ai-status';
-      status: string;
-      message: string;
-    };
+  // Convert feed data into the types used by the UI.
+  const chatMessages = rawChatMessages
+    .map((message) => message.data)
+    .filter(
+      (message): message is AIChatMessage =>
+        typeof message === 'object' &&
+        message !== null &&
+        'type' in message &&
+        message.type === 'ai-chat',
+    );
 
-    if (data?.type === 'ai-status') {
-      setAiStatus({
-        type: 'ai-status',
-        status: data.status as any,
-        message: data.message,
-      });
+  const statusMessages = rawStatusMessages
+    .map((message) => message.data)
+    .filter(
+      (message): message is AIStatus =>
+        typeof message === 'object' &&
+        message !== null &&
+        'type' in message &&
+        message.type === 'ai-status',
+    );
 
-      if (data.status === 'completed' || data.status === 'error') {
-        const aiMessage: AIChatMessage = {
-          type: 'ai-chat',
-          senderId: 'ghost-ai',
-          senderName: 'Ghost AI',
-          role: 'ai',
-          content: data.message,
-          timestamp: Date.now(),
-        };
-        setChatMessages((prev) => [...prev, aiMessage]);
-      }
-    }
-  }, [aiStatusFeed]);
+  const aiStatus =
+    statusMessages.length > 0
+      ? statusMessages[statusMessages.length - 1]
+      : null;
 
-  const isRunActive = !!runState;
   const isAiThinking =
     aiStatus?.status === 'started' || aiStatus?.status === 'processing';
+
+  const isRunActive = runState !== null;
 
   // Auto-resize textarea
   useEffect(() => {
@@ -148,6 +141,20 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
       textareaRef.current.style.height = `${Math.min(Math.max(textareaRef.current.scrollHeight, 72), 160)}px`;
     }
   }, [inputValue]);
+
+  const ensureChatFeed = async () => {
+    try {
+      await liveblocks.createFeed({
+        roomId,
+        feedId: 'ai-chat',
+      });
+    } catch (error: any) {
+      // Feed already exists
+      if (error?.status !== 409) {
+        throw error;
+      }
+    }
+  };
 
   const handleKeyDown = async (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -163,30 +170,26 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
 
     setIsSending(true);
     setSendError(null);
-
-    // 1. Add user's message directly to Liveblocks
-    const userMessage: AIChatMessage = {
-      type: 'ai-chat',
-      senderId: user?.id ?? 'unknown',
-      senderName: user?.fullName ?? user?.username ?? 'You',
-      role: 'user',
-      content: text,
-      timestamp: Date.now(),
-    };
-
-    setChatMessages((prev) => [...prev, userMessage]);
-
-    // 2. Add initial AI status
-    setAiStatus({
-      type: 'ai-status',
-      status: 'started',
-      message: 'Ghost AI is analyzing your request…',
-    });
-
     setInputValue('');
 
     try {
-      // 3. Start the AI design run
+      // 1. Add the user's message to the Liveblocks chat feed.
+      await ensureChatFeed();
+
+      await liveblocks.createFeedMessage({
+        roomId,
+        feedId: 'ai-chat',
+        data: {
+          type: 'ai-chat',
+          senderId: user?.id ?? 'unknown',
+          senderName: user?.fullName ?? user?.firstName ?? 'You',
+          role: 'user',
+          content: text,
+          timestamp: Date.now(),
+        },
+      });
+
+      // 2. Start the Trigger.dev design run.
       const response = await fetch('/api/ai/design', {
         method: 'POST',
         headers: {
@@ -205,13 +208,19 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
 
       const { runId } = await response.json();
 
-      // 4. Get public token for Trigger realtime updates
+      if (!runId) {
+        throw new Error('No run ID returned from design request');
+      }
+
+      // 3. Get the public Trigger.dev token.
       const tokenResponse = await fetch('/api/ai/design/token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ runId }),
+        body: JSON.stringify({
+          runId,
+        }),
       });
 
       if (!tokenResponse.ok) {
@@ -220,7 +229,11 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
 
       const { token } = await tokenResponse.json();
 
-      // 5. Start watching the Trigger run
+      if (!token) {
+        throw new Error('No realtime token returned');
+      }
+
+      // 4. Watch the Trigger.dev run.
       setRunState({
         runId,
         token,
@@ -233,86 +246,27 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
           ? error.message
           : 'Failed to submit prompt. Please try again.',
       );
-
-      // Show failure in chat
-
-      const aiMessage: AIChatMessage = {
-        type: 'ai-chat',
-        senderId: 'ghost-ai',
-        senderName: 'Ghost AI',
-        role: 'ai',
-        content:
-          'I couldn’t complete the architecture generation. Please try again.',
-        timestamp: Date.now(),
-      };
-
-      setChatMessages((prev) => [...prev, aiMessage]);
-
-      // Error status
-      setAiStatus({
-        type: 'ai-status',
-        status: 'error',
-        message: 'Ghost AI encountered an error.',
-      });
-
       setIsSending(false);
     }
   };
 
-  if (!isOpen) return null;
+  const handleRunStatusChange = async (status: string, _output: unknown) => {
+    setRunState(null);
+    setIsSending(false);
+  };
 
-  const activeRun = runState;
+  if (!isOpen) return null;
 
   return (
     <>
-      {activeRun && (
+      {runState && (
         <RealtimeRunWatcher
-          runId={activeRun.runId}
-          accessToken={activeRun.token}
-          onStatusChange={(status, _output) => {
-            const isSuccess = status === 'COMPLETED';
-
-            if (isSuccess) {
-              const aiMessage: AIChatMessage = {
-                type: 'ai-chat',
-                senderId: 'ghost-ai',
-                senderName: 'Ghost AI',
-                role: 'ai',
-                content: 'Architecture design complete.',
-                timestamp: Date.now(),
-              };
-
-              setChatMessages((prev) => [...prev, aiMessage]);
-
-              setAiStatus({
-                type: 'ai-status',
-                status: 'completed',
-                message: 'Architecture design complete.',
-              });
-            } else {
-              const aiMessage: AIChatMessage = {
-                type: 'ai-chat',
-                senderId: 'ghost-ai',
-                senderName: 'Ghost AI',
-                role: 'ai',
-                content:
-                  'I couldn’t complete the architecture generation. Please try again.',
-                timestamp: Date.now(),
-              };
-
-              setChatMessages((prev) => [...prev, aiMessage]);
-
-              setAiStatus({
-                type: 'ai-status',
-                status: 'error',
-                message: 'Ghost AI encountered an error.',
-              });
-            }
-
-            setRunState(null);
-          }}
+          runId={runState.runId}
+          accessToken={runState.token}
+          onStatusChange={handleRunStatusChange}
         />
       )}
+
       <aside className='flex h-full min-h-0 w-75 shrink-0 flex-col overflow-hidden rounded-2xl border border-border-subtle bg-surface/95 shadow-xl'>
         {/* Header */}
         <header className='flex h-16 shrink-0 items-center justify-between border-b border-border-subtle px-4'>
@@ -328,7 +282,6 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
                 <p className='text-[10px] text-muted-foreground'>
                   Collaborate with Ghost AI
                 </p>
-                
               </div>
             </div>
           </div>
@@ -474,7 +427,7 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
                     'min-h-18 max-h-40 resize-none border-0 bg-transparent p-2 text-xs focus-visible:ring-0',
                     isAiThinking && 'opacity-50 cursor-not-allowed',
                   )}
-                  disabled={isRunActive}
+                  disabled={isAiThinking}
                 />
 
                 <Button
@@ -484,10 +437,10 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
                     (isAiThinking || isSending) &&
                       'opacity-50 cursor-not-allowed',
                   )}
-                  disabled={isRunActive || isSending}
+                  disabled={isAiThinking || isSending}
                   onClick={handleSendMessage}
                 >
-                  {isRunActive || isSending ? (
+                  {isSending ? (
                     <Loader2 className='h-4 w-4 animate-spin' />
                   ) : (
                     <Send className='h-4 w-4' />
