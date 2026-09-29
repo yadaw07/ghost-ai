@@ -1,6 +1,6 @@
 import { Liveblocks } from '@liveblocks/node';
 
-export const LIVEBLOCKS_FEED_IDS = ['ai-chat', 'ai-status-feed'] as const;
+export const LIVEBLOCKS_FEED_IDS = ['ai-chat', 'ai-status'] as const;
 
 export const CURSOR_COLORS = [
   '#E11D48',

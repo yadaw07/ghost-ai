@@ -18,7 +18,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { getLiveblocksClient } from '@/lib/liveblocks';
 
 interface AISidebarProps {
   roomId: string;
@@ -91,8 +90,9 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
     token: string;
   } | null>(null);
 
+  const createFeedMessage = useCreateFeedMessage();
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const liveblocks = getLiveblocksClient();
 
   const { messages: rawChatMessages } = useFeedMessages('ai-chat');
   const { messages: rawStatusMessages } = useFeedMessages('ai-status');
@@ -132,20 +132,6 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
     }
   }, [inputValue]);
 
-  const ensureChatFeed = async () => {
-    try {
-      await liveblocks.createFeed({
-        roomId,
-        feedId: 'ai-chat',
-      });
-    } catch (error: any) {
-      // Feed already exists
-      if (error?.status !== 409) {
-        throw error;
-      }
-    }
-  };
-
   const handleKeyDown = async (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -164,19 +150,13 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
 
     try {
       // 1. Add the user's message to the Liveblocks chat feed.
-      await ensureChatFeed();
-
-      await liveblocks.createFeedMessage({
-        roomId,
-        feedId: 'ai-chat',
-        data: {
-          type: 'ai-chat',
-          senderId: user?.id ?? 'unknown',
-          senderName: user?.fullName ?? user?.firstName ?? 'You',
-          role: 'user',
-          content: text,
-          timestamp: Date.now(),
-        },
+      createFeedMessage('ai-chat', {
+        type: 'ai-chat',
+        senderId: user?.id ?? 'unknown',
+        senderName: user?.fullName ?? user?.firstName ?? 'You',
+        role: 'user',
+        content: text,
+        timestamp: Date.now(),
       });
 
       // 2. Start the Trigger.dev design run.
