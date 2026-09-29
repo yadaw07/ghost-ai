@@ -12,7 +12,7 @@ import {
 import { useRealtimeRun } from '@trigger.dev/react-hooks';
 
 import { cn } from '@/lib/utils';
-import { AIStatus, AIChatMessage } from '@/types/tasks';
+import { AIChatMessageSchema, AIStatusSchema } from '@/types/tasks';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -105,24 +105,14 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
 
   // Convert feed data into the types used by the UI.
   const chatMessages = rawChatMessages
-    .map((message: AIChatMessage) => message.data)
-    .filter(
-      (message: AIChatMessage) =>
-        typeof message === 'object' &&
-        message !== null &&
-        'type' in message &&
-        message.type === 'ai-chat',
-    );
+    .map((message) => AIChatMessageSchema.safeParse(message.data))
+    .filter((result) => result.success)
+    .map((result) => result.data);
 
   const statusMessages = rawStatusMessages
-    .map((message: AIStatus) => message.data)
-    .filter(
-      (message: AIStatus) =>
-        typeof message === 'object' &&
-        message !== null &&
-        'type' in message &&
-        message.type === 'ai-status',
-    );
+    .map((message) => AIStatusSchema.safeParse(message.data))
+    .filter((result) => result.success)
+    .map((result) => result.data);
 
   const aiStatus =
     statusMessages.length > 0

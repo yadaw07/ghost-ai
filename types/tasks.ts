@@ -1,16 +1,12 @@
 import { z } from 'zod';
 
 export interface AIStatus {
-  [key: string]: string | number;
-
   type: 'ai-status';
   status: 'started' | 'processing' | 'completed' | 'error';
   message: string;
 }
 
 export interface AIChatMessage {
-  [key: string]: string | number;
-
   type: 'ai-chat';
   senderId: string;
   senderName: string;
@@ -18,6 +14,12 @@ export interface AIChatMessage {
   content: string;
   timestamp: number;
 }
+
+export const AIStatusSchema = z.object({
+  type: z.literal('ai-status'),
+  status: z.enum(['started', 'processing', 'completed', 'error']),
+  message: z.string(),
+});
 
 export const AIChatMessageSchema = z.object({
   type: z.literal('ai-chat'),
