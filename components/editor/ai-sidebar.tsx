@@ -97,11 +97,8 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
   const { messages: rawChatMessages } = useFeedMessages('ai-chat');
   const { messages: rawStatusMessages } = useFeedMessages('ai-status');
 
-  const AI_CHAT = useFeedMessages('ai-chat');
-  const AI_STATUS = useFeedMessages('ai-status');
-
-  console.log({ AI_CHAT });
-  console.log({ AI_STATUS });
+  console.log({ rawChatMessages });
+  console.log({ rawStatusMessages });
 
   // Convert feed data into the types used by the UI.
   const chatMessages = rawChatMessages
@@ -113,6 +110,9 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
     .map((message) => AIStatusSchema.safeParse(message.data))
     .filter((result) => result.success)
     .map((result) => result.data);
+
+  console.log({ chatMessages });
+  console.log({ statusMessages });
 
   const aiStatus =
     statusMessages.length > 0
