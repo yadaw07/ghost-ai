@@ -105,9 +105,9 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
 
   // Convert feed data into the types used by the UI.
   const chatMessages = rawChatMessages
-    .map((message) => message.data)
+    .map((message: AIChatMessage) => message.data)
     .filter(
-      (message): message is AIChatMessage =>
+      (message: AIChatMessage) =>
         typeof message === 'object' &&
         message !== null &&
         'type' in message &&
@@ -115,9 +115,9 @@ export function AISidebar({ roomId, isOpen, onClose }: AISidebarProps) {
     );
 
   const statusMessages = rawStatusMessages
-    .map((message) => message.data)
+    .map((message: AIStatus) => message.data)
     .filter(
-      (message): message is AIStatus =>
+      (message: AIStatus) =>
         typeof message === 'object' &&
         message !== null &&
         'type' in message &&
