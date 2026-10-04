@@ -1,6 +1,6 @@
 ## Current Phase
 
-- Feature 28 (TBD).
+- Feature 29 (TBD).
 
 ## Current Goal
 
@@ -36,6 +36,7 @@
 - Feature 25: Sidebar Chat Feed — Implement real-time room chat in the AI sidebar using a dedicated Liveblocks `ai-chat` feed.
 - Feature 26: Design Agent Frontend — Wired up AI sidebar to submit design prompts, track real-time run status via `@trigger.dev/react-hooks`, and display status updates in a compact UI strip.
 - Feature 27: Spec Generation Flow — Implemented backend flow for AI-powered spec generation with authenticated room-based access checks, Prisma TaskRun ownership tracking, Trigger.dev task wiring, and run-scoped public token issuance.
+- Feature 28: Spec Persistence and Download — Added the `ProjectSpec` Prisma model, persisted generated Markdown specs to Vercel Blob, saved file metadata under the project, and added an authenticated download route that validates project access before returning the Markdown attachment.
 
 ## In Progress
 
@@ -43,7 +44,7 @@
 
 ## Next Up
 
-- Feature 28 (TBD).
+- Feature 29 (TBD).
 
 ## Open Questions
 

@@ -2,6 +2,9 @@ import { task, logger } from '@trigger.dev/sdk/v3';
 import { z } from 'zod';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText } from 'ai';
+import { put } from '@vercel/blob';
+
+import { prisma } from '@/lib/prisma';
 
 const google = createGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_AI_API_KEY,
@@ -62,7 +65,10 @@ export const generateSpec = task({
 
     const chatSummary = input.chatHistory.length
       ? input.chatHistory
-          .map((message) => `${message.role}: ${message.content}`)
+          .map(
+            (message: { role: 'user' | 'assistant' | 'system'; content: string }) =>
+              `${message.role}: ${message.content}`,
+          )
           .join('\n')
       : 'No chat history provided.';
 
@@ -81,12 +87,36 @@ export const generateSpec = task({
       prompt: `Project ID: ${input.projectId}\nRoom ID: ${input.roomId}\n\nChat context:\n${chatSummary}\n\nCanvas graph:\n${canvasSummary}`,
     });
 
+    const markdown = text.trim();
+    const filePath = `specs/${input.projectId}/${crypto.randomUUID()}.md`;
+
+    await put(filePath, markdown, {
+      access: 'private',
+      contentType: 'text/markdown; charset=utf-8',
+      allowOverwrite: true,
+    });
+
+    const specRecord = await prisma.projectSpec.create({
+      data: {
+        projectId: input.projectId,
+        filePath,
+      },
+      select: {
+        id: true,
+        projectId: true,
+        filePath: true,
+        createdAt: true,
+      },
+    });
+
     logger.log('Spec generation completed', {
       projectId: input.projectId,
       roomId: input.roomId,
-      markdownLength: text.length,
+      markdownLength: markdown.length,
+      filePath,
+      specId: specRecord.id,
     });
 
-    return text.trim();
+    return markdown;
   },
 });
