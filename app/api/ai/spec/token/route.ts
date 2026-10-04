@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     }
 
     const token = await auth.createPublicToken({
-      expiresIn: 60 * 60,
+      expirationTime: "1h",
       scopes: {
         read: {
           runs: [runId],
