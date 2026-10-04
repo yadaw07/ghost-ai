@@ -1,6 +1,6 @@
 ## Current Phase
 
-- Feature 27 (TBD).
+- Feature 28 (TBD).
 
 ## Current Goal
 
@@ -35,14 +35,15 @@
 - Feature 24: AI Presence State — Add shared AI activity indicators so everyone in the room can see when generation is in progress. This unit is only for UI, presence, and realtime status signals.
 - Feature 25: Sidebar Chat Feed — Implement real-time room chat in the AI sidebar using a dedicated Liveblocks `ai-chat` feed.
 - Feature 26: Design Agent Frontend — Wired up AI sidebar to submit design prompts, track real-time run status via `@trigger.dev/react-hooks`, and display status updates in a compact UI strip.
+- Feature 27: Spec Generation Flow — Implemented backend flow for AI-powered spec generation with authenticated room-based access checks, Prisma TaskRun ownership tracking, Trigger.dev task wiring, and run-scoped public token issuance.
 
 ## In Progress
 
-- None .
+- None.
 
 ## Next Up
 
-- Feature 27 (TBD).
+- Feature 28 (TBD).
 
 ## Open Questions
 
