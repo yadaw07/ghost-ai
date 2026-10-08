@@ -1,8 +1,10 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
+
 import { NextResponse } from 'next/server';
 import { get } from '@vercel/blob';
 
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 
 export async function GET(
   _request: Request,
@@ -31,7 +33,7 @@ export async function GET(
                     some: {
                       email: {
                         equals: email,
-                        mode: 'insensitive',
+                        mode: Prisma.QueryMode.insensitive,
                       },
                     },
                   },
